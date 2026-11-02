@@ -1,70 +1,73 @@
-# Consulting & System Analysis Services
+# Business Systems Analysis & Digital Transformation Advisory
 
-> **Helping tech startups, scale-ups, and modern enterprises transform complex business workflows into scalable, production-ready digital architectures.**
+> **Helping business founders, SMBs, and product teams transform operational friction into streamlined digital workflows that actually drive revenue.**
 
-Hello! I'm **Tri Raida**, a Technical Business & System Analyst with a background spanning entrepreneurship, business workflow modeling, multi-tenant cloud architecture, and modern full-stack systems.
+Hello! I'm **Tri Raida**, a Business Systems Analyst with a background rooted in real-world entrepreneurship, business operations, and digital transformation.
 
-I bridge the communication and implementation gap between **executive business stakeholders** and **engineering teams**—ensuring software is designed around real business outcomes, not just isolated technical features.
+I act as the essential bridge between **business stakeholders/founders** and **software developers**:
+* I speak the language of founders (margins, customer churn, cash flow, operational bottlenecks).
+* I translate those real-world business needs into structured, visual, and developer-ready specifications so engineering teams build the right solution the first time.
 
 ---
 
-## 🛠️ How I Can Help Your Team
+## 🛠️ Service Offerings
 
-### 1. System Discovery & Architecture Specification (0 to 1)
-* **Best for:** Early-stage startups, new product initiatives, or platform rewrites.
+### 1. Business Workflow Discovery & Operational Gap Analysis
+* **Best for:** Businesses struggling with fragmented spreadsheets, manual paper records, or disconnected SaaS apps.
+* **What We Do:**
+  * Deep-dive audit of your daily operational flows (ordering, invoicing, inventory, customer follow-up).
+  * Identify revenue leakage, dead inventory traps, and staff bottlenecks.
 * **Deliverables:**
-  * Complete Product & System Requirement Specifications (PRD/SRS in Markdown).
-  * System Architecture Visualizations using the **C4 Model** (Mermaid.js).
-  * API Contract & Integration Specifications (REST, GraphQL, Webhooks).
-  * Relational & NoSQL Data Schemas with Multi-Tenant Access Policies (e.g., PostgreSQL Row-Level Security).
-  * Delivery timeline estimation and sprint-ready backlog with Gherkin BDD criteria.
+  * **As-Is vs. To-Be Workflow Maps** (visual Mermaid / BPMN diagrams).
+  * Actionable Gap Analysis Report outlining immediate fixes and digitalization priorities.
 
-### 2. Business Process Optimization & Workflow Digitization
-* **Best for:** Companies with manual or fragmented operations across spreadsheets and disconnected SaaS tools.
+### 2. Developer-Ready Functional Requirements Engineering
+* **Best for:** Founders or non-technical business owners hiring external software agencies or freelance developers.
+* **What We Do:**
+  * Eliminate miscommunication and scope creep by converting your business vision into crystal-clear specifications.
+  * Structure every feature with clear edge cases and acceptance criteria.
 * **Deliverables:**
-  * **As-Is vs. To-Be Process Mapping** (BPMN 2.0).
-  * Bottleneck & Revenue Leakage Analysis.
-  * System Feedback Loops (transforming transaction records into actionable CRM & operational triggers).
-  * Automated workflows & Webhook integration blueprints.
+  * Comprehensive **Product Requirements Document (PRD)** & **System Requirements Specification (SRS)** in Markdown.
+  * User Stories with **Gherkin BDD** (`Given-When-Then`) acceptance criteria ready for developer sprint backlogs.
+  * User Journey and Entity Relationship Diagrams (ERD) mapping core business data.
 
-### 3. Technical Requirements Engineering & Backlog Grooming
-* **Best for:** Engineering teams struggling with vague tickets, scope creep, or misaligned acceptance criteria.
+### 3. Pragmatic Digital Transformation Advisory
+* **Best for:** Growing businesses wanting to modernize their tooling without over-engineering or wasting budget on unnecessary custom software.
+* **What We Do:**
+  * Evaluate Build vs. Buy decisions (when to use ready-made SaaS vs. when custom software is genuinely justified).
+  * Advise on automation, customer retention feedback loops, and multi-tenant architectures.
 * **Deliverables:**
-  * Granular User Stories written with automated **Gherkin BDD** syntax (`Given-When-Then`).
-  * Edge-case mapping (error envelopes, concurrency, idempotency, rate limits).
-  * Requirements Traceability Matrix (RTM) linking business goals directly to QA test cases.
-
-### 4. Fractional / Retainer Technical BSA
-* **Best for:** Scale-ups needing ongoing systems analysis support without committing to a full-time in-house hire.
-* **Deliverables:**
-  * Ongoing liaison between Product Owners and Tech Leads.
-  * Sprint planning, architecture decision reviews (ADRs), and sprint defect triage.
-  * Vendor API evaluation and technical feasibility assessments.
+  * Digital Transformation Roadmap (Phased implementation with clear milestones).
+  * Tool & Vendor Evaluation Matrix.
 
 ---
 
 ## 💼 Featured Case Study: ROTARI
 
-To see an end-to-end demonstration of my methodology in action, check out **ROTARI**—a real-world business management and CRM platform for multi-tenant retail businesses:
-* **Repository & Architecture Spec:** [https://github.com/reviveproject4-source/ROTARI](https://github.com/reviveproject4-source/ROTARI)
+To see how I approach business problem solving and system design in practice, explore **ROTARI**—a retail management and CRM platform I designed around the real-world operational workflows of small businesses:
+
+* **Repository:** [https://github.com/reviveproject4-source/ROTARI](https://github.com/reviveproject4-source/ROTARI)
 * **Live Demo:** [https://rotari.vercel.app](https://rotari.vercel.app)
-* **Core Highlight:** Implemented a multi-tenant operational data model with PostgreSQL Row-Level Security (RLS), turning raw point-of-sale transactions into automated customer retention and CRM actions.
+* **Core Highlight:** Designed an operational feedback loop where a standard point-of-sale transaction automatically updates customer history and flags dormant customers for targeted CRM follow-up.
 
 ---
 
-## 🤝 Engagement Models & Working Arrangements
+## 🤝 How We Can Work Together
 
-* **Availability:** Available for **International Remote Contracts**, Project-Based Engagements, and Fractional Advisory roles.
-* **Time Zones:** Flexible overlap with US (PST/EST), Europe (CET/GMT), and APAC (SGT/AEST).
-* **Communication Stack:** Slack, GitHub, Jira/Linear, Notion, Loom, Zoom/Google Meet.
+* **Project-Based Sprints:** Defined deliverables (e.g., 2-week Discovery & Specification Sprint for your upcoming software project).
+* **Advisory Retainer:** Ongoing monthly hours supporting your team during software development and vendor reviews.
+* **Discovery Consultation:** 60-minute focused session to untangle an operational bottleneck.
+
+**Time Zone Availability:** Flexible remote collaboration across US, European, and APAC time zones.  
+**Collaboration Tools:** Slack, Google Meet, Loom, GitHub, Notion, Miro/Mermaid.
 
 ---
 
-## 📬 Let's Connect
+## 📬 Let's Talk Business
 
-Ready to discuss your project or need an experienced technical pair of eyes on your system design?
+Ready to bring clarity to your business workflows or need developer-ready specifications for your next system?
 
 * **Email:** [tri.raida.consulting@gmail.com](mailto:tri.raida.consulting@gmail.com) *(or your preferred email)*
 * **LinkedIn:** [Connect on LinkedIn](https://linkedin.com) *(Add your profile URL)*
 * **GitHub:** [@reviveproject4-source](https://github.com/reviveproject4-source)
-* **Book a Discovery Call:** [Schedule 20-min Initial Consultation](https://calendly.com) *(Add Calendly link)*
+* **Schedule a Call:** [Book a 20-Minute Intro Discovery Call](https://calendly.com) *(Add Calendly link)*
