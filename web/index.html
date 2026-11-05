@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>system-blueprint-os Studio | Anti-Failure & Scope Engine</title>
+  <meta name="description" content="The Open Enterprise Specification & Anti-Failure Engine for SaaS Founders, Small Business Owners, and Software Engineers.">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Mermaid.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            },
+            dark: {
+              900: '#090d16',
+              800: '#0f172a',
+              700: '#1e293b',
+              600: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card:hover {
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+    .glow-effect {
+      background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.15), transparent 70%);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-brand-500 selection:text-black">
+
+  <!-- Glow Background -->
+  <div class="fixed inset-0 glow-effect pointer-events-none z-0"></div>
+
+  <!-- Navigation -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800/80 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-brand-500/20">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
+            system-blueprint-os
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/30">v1.0 Studio</span>
+          </span>
+          <p class="text-xs text-slate-400 hidden sm:block">Open Enterprise Specification & Anti-Failure Engine</p>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-4 text-sm font-medium">
+        <a href="#calculator" class="text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i data-lucide="calculator" class="w-4 h-4 text-brand-400"></i>
+          <span>Risk Calculator</span>
+        </a>
+        <a href="#generator" class="text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i data-lucide="file-code-2" class="w-4 h-4 text-emerald-400"></i>
+          <span>Spec Generator</span>
+        </a>
+        <a href="#diagrams" class="text-slate-300 hover:text-white transition hidden md:flex items-center gap-1.5">
+          <i data-lucide="workflow" class="w-4 h-4 text-sky-400"></i>
+          <span>Visual Flows</span>
+        </a>
+        <a href="https://github.com/reviveproject4-source/OpenBSA" target="_blank" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold flex items-center gap-2 border border-slate-700 transition shadow-sm">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          <span>Star on GitHub</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative z-10 pt-16 pb-12 px-6 max-w-5xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-6">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+      <span>Built for SaaS Founders, Small Business Operators & Developers</span>
+    </div>
+    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight text-white mb-6">
+      Stop Software Failure <br class="hidden sm:inline" />
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-brand-500 to-teal-300">
+        Before Writing a Single Line of Code
+      </span>
+    </h1>
+    <p class="text-lg sm:text-xl text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+      90% of software projects fail or blow their budget due to <strong class="text-white">unscoped edge cases</strong>. 
+      Use this studio to diagnose scope risk, generate developer-ready failure-mode specs, and eliminate 50% of costly revision loops.
+    </p>
+
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      <a href="#calculator" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-brand-500/25 transition">
+        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+        <span>Run Scope Risk Assessment</span>
+      </a>
+      <a href="#generator" class="px-6 py-3.5 rounded-xl glass-card hover:bg-slate-800 text-white font-semibold text-sm flex items-center gap-2 transition">
+        <i data-lucide="file-text" class="w-4 h-4 text-brand-400"></i>
+        <span>Generate Developer-Ready PRD</span>
+      </a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto text-left">
+      <div class="glass-card p-4 rounded-xl border border-slate-800">
+        <div class="text-2xl font-extrabold text-white">14</div>
+        <div class="text-xs text-slate-400">Anti-Failure Blueprints</div>
+      </div>
+      <div class="glass-card p-4 rounded-xl border border-slate-800">
+        <div class="text-2xl font-extrabold text-brand-400">100%</div>
+        <div class="text-xs text-slate-400">Docs-as-Code & Open Source</div>
+      </div>
+      <div class="glass-card p-4 rounded-xl border border-slate-800">
+        <div class="text-2xl font-extrabold text-emerald-400">0%</div>
+        <div class="text-xs text-slate-400">Scope Creep Tolerance</div>
+      </div>
+      <div class="glass-card p-4 rounded-xl border border-slate-800">
+        <div class="text-2xl font-extrabold text-sky-400">Vercel Ready</div>
+        <div class="text-xs text-slate-400">Zero-Config Deployment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: Scope Risk Calculator -->
+  <section id="calculator" class="relative z-10 py-16 px-6 max-w-5xl mx-auto">
+    <div class="glass-card p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 flex items-center justify-center">
+          <i data-lucide="calculator" class="w-5 h-5"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">Scope Risk & Budget Leakage Diagnostic</h2>
+      </div>
+      <p class="text-sm text-slate-400 mb-8">
+        Answer these 7 critical architecture questions to evaluate whether your planned software is vulnerable to budget blowouts, race conditions, or client disputes.
+      </p>
+
+      <div class="space-y-6" id="quiz-container">
+        <!-- Question 1 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            1. How does your system handle payment webhook retries from gateways (Stripe/Xendit/PayPal)?
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q1" value="0" class="text-brand-500 focus:ring-0">
+              <span>We have atomic idempotency keys & DB row-locks on payment refs.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q1" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>We haven't thought about it / simple INSERT INTO orders endpoint.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            2. If 5 customers click "Checkout" on the last remaining stock item at the exact same millisecond:
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q2" value="0" class="text-brand-500 focus:ring-0">
+              <span>DB constraints prevent negative stock (`available >= 1` in atomic UPDATE).</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q2" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>App checks stock in memory, then updates. (Vulnerable to race conditions).</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            3. Multi-Tenant Data Isolation (Preventing Company A from seeing Company B's data):
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q3" value="0" class="text-brand-500 focus:ring-0">
+              <span>Enforced by DB Kernel via Row-Level Security (RLS) policies.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q3" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>Developers remember to manually add `WHERE tenant_id = ?` in code.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            4. Scope Boundary & Definition of Done (DoD) in Client/Developer Agreement:
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q4" value="0" class="text-brand-500 focus:ring-0">
+              <span>Explicit "Out-of-Scope" list with formal Change Request fee schedule signed.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q4" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>Vague brief ("Build feature X with revisions as needed"). High risk of creep.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            5. Financial Integrity & Currency Rounding:
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q5" value="0" class="text-brand-500 focus:ring-0">
+              <span>Amounts stored strictly in integer atomic cents with Banker's Rounding.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q5" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>Stored as FLOAT / standard decimals. (Cumulative tax drift risk).</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            6. External Dependency Outages (Third-party WhatsApp, AI, or Email APIs down):
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q6" value="0" class="text-brand-500 focus:ring-0">
+              <span>Circuit Breaker & Async Job Queues prevent frontend freezes.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q6" value="15" checked class="text-brand-500 focus:ring-0">
+              <span>Synchronous API calls on the checkout thread (Can hang checkout for 60s).</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80">
+          <label class="block text-sm font-semibold text-slate-200 mb-3">
+            7. SMS & Verification Endpoint Protection (Bot Toll Fraud):
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q7" value="0" class="text-brand-500 focus:ring-0">
+              <span>Country prefix geofencing, daily spend kill-switch ($50 max), and Turnstile.</span>
+            </label>
+            <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer bg-slate-950/50">
+              <input type="radio" name="q7" value="10" checked class="text-brand-500 focus:ring-0">
+              <span>Basic or no rate limiting. (Vulnerable to overnight $5,000 SMS bills).</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="mt-8 flex justify-center">
+        <button onclick="calculateRisk()" class="px-8 py-3.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-brand-500/30 transition">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Calculate Project Risk Index</span>
+        </button>
+      </div>
+
+      <!-- Result Card -->
+      <div id="risk-result" class="hidden mt-8 p-6 rounded-2xl border transition-all">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Interactive Spec Generator -->
+  <section id="generator" class="relative z-10 py-16 px-6 max-w-5xl mx-auto">
+    <div class="glass-card p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="file-code-2" class="w-5 h-5"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">Interactive Failure-Mode Spec Generator</h2>
+      </div>
+      <p class="text-sm text-slate-400 mb-8">
+        Select your project domain and check the edge cases you need to lock down. Generate a developer-ready Markdown specification to include in your project brief or GitHub repo.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">System Name</label>
+          <input type="text" id="spec-app-name" value="Acme Enterprise Platform" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:border-brand-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Project Domain</label>
+          <select id="spec-domain" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:border-brand-500 focus:outline-none">
+            <option value="saas">B2B Multi-Tenant SaaS</option>
+            <option value="retail">Retail Multi-Branch POS & Inventory</option>
+            <option value="marketplace">Subscription / Marketplace Platform</option>
+            <option value="custom">Custom Enterprise System</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Author / Lead Analyst</label>
+          <input type="text" id="spec-author" value="Tri Raida" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:border-brand-500 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-xs font-semibold uppercase text-slate-400 mb-3">Mandatory Edge-Case Modules to Include</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" id="modules-checklist">
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="idempotency" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-01: Payment Idempotency & Webhook Mutex</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="concurrency" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-02: Inventory Concurrency & Race Conditions</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="rls" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-03: PostgreSQL Row-Level Security (RLS)</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="audit" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-04: Immutable Audit Trail & Anti-Fraud</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="scopepact" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-05: The Anti-Scope Creep Agreement & DoD</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="rounding" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-07: Banker's Rounding & Integer Cents</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="circuit" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-12: Third-Party Circuit Breaker & Queue</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-800 bg-slate-950/60 hover:border-slate-700 cursor-pointer">
+            <input type="checkbox" value="shield" checked class="rounded text-brand-500 focus:ring-0">
+            <span>BP-13: Toll Fraud Shield & SMS Kill Switch</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mb-4">
+        <button onclick="generateSpecMarkdown()" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Compile Markdown Specification</span>
+        </button>
+        <div class="flex gap-2">
+          <button onclick="copySpec()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white flex items-center gap-1.5 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="copy-btn-text">Copy Markdown</span>
+          </button>
+          <button onclick="downloadSpec()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Download .md</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Box -->
+      <div class="relative">
+        <textarea id="spec-output" rows="14" readonly class="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 focus:outline-none resize-none leading-relaxed"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Visual Flow Studio (Mermaid) -->
+  <section id="diagrams" class="relative z-10 py-16 px-6 max-w-5xl mx-auto">
+    <div class="glass-card p-8 sm:p-10 rounded-2xl border border-slate-800 shadow-2xl">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
+          <i data-lucide="workflow" class="w-5 h-5"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">Visual Architecture & Flow Studio</h2>
+      </div>
+      <p class="text-sm text-slate-400 mb-8">
+        Preview native Mermaid diagrams used to align non-technical operators and engineers. Copy diagram source code directly into your GitHub issues or documentation.
+      </p>
+
+      <!-- Diagram Tabs -->
+      <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-800 pb-3">
+        <button onclick="switchDiagram('rls')" id="tab-rls" class="diagram-tab px-4 py-2 rounded-lg text-xs font-bold bg-brand-500/20 text-brand-400 border border-brand-500/40">
+          Multi-Tenant RLS Architecture
+        </button>
+        <button onclick="switchDiagram('webhook')" id="tab-webhook" class="diagram-tab px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white">
+          Payment Webhook Idempotency Loop
+        </button>
+        <button onclick="switchDiagram('fourofeyes')" id="tab-fourofeyes" class="diagram-tab px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white">
+          Four-Eyes Approval Gate
+        </button>
+        <button onclick="switchDiagram('breaker')" id="tab-breaker" class="diagram-tab px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white">
+          Circuit Breaker State Machine
+        </button>
+      </div>
+
+      <!-- Diagram Container -->
+      <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 overflow-x-auto min-h-[300px] flex items-center justify-center" id="mermaid-render-area">
+        <div class="mermaid text-center text-sm" id="active-mermaid-code">
+graph TD
+    User([Tenant Operator / Staff]) -->|HTTPS / JWT| Gateway[Auth & API Gateway]
+    Gateway -->|Sets DB Session: app.current_tenant_id| Engine[Core Business Engine]
+    Engine --> RLS[PostgreSQL Kernel Row-Level Security]
+    RLS -->|Strict Isolation Policy| TenantData[(Tenant-Specific Data)]
+    RLS -.->|BLOCKED SILENTLY| OtherTenants[(Other Tenant Records)]
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end">
+        <button onclick="copyDiagramCode()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white flex items-center gap-1.5 transition">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span id="copy-diagram-btn-text">Copy Mermaid Code</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Advisory & Consulting CTA -->
+  <section class="relative z-10 py-16 px-6 max-w-5xl mx-auto">
+    <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-emerald-500/20 shadow-2xl relative overflow-hidden">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-4">
+          <span>Direct Advisory & Architecture Review</span>
+        </div>
+        <h3 class="text-3xl font-extrabold text-white mb-4 tracking-tight">
+          Need an Experienced Business Systems Analyst for Your Next Build?
+        </h3>
+        <p class="text-sm text-slate-300 mb-8 leading-relaxed">
+          I'm <strong>Tri Raida</strong>, a Business Systems Analyst with an entrepreneurial background. 
+          I audit business operations, engineer developer-ready functional specifications, and protect international founders from burning budget on avoidable software mistakes.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="mailto:tri.raida.consulting@gmail.com" class="px-6 py-3 rounded-xl bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-brand-500/20 transition">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span>Schedule Initial Consultation</span>
+          </a>
+          <a href="https://github.com/reviveproject4-source/ROTARI" target="_blank" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs flex items-center gap-2 border border-slate-700 transition">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            <span>Explore ROTARI Case Study</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-slate-800/80 py-8 px-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="text-slate-300 font-semibold">system-blueprint-os</span> &copy; 2026 Tri Raida. Released under the MIT License.
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/reviveproject4-source/OpenBSA" class="hover:text-slate-300 transition">GitHub</a>
+        <a href="https://rotari.vercel.app" class="hover:text-slate-300 transition">ROTARI Live</a>
+        <a href="mailto:tri.raida.consulting@gmail.com" class="hover:text-slate-300 transition">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+    
+    // Initialize Mermaid
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: 'dark',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#0f172a',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#334155',
+        lineColor: '#22c55e',
+        secondaryColor: '#1e293b',
+        tertiaryColor: '#090d16'
+      }
+    });
+
+    // 1. Calculate Risk
+    function calculateRisk() {
+      const questions = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
+      let score = 0;
+      questions.forEach(q => {
+        const val = document.querySelector(`input[name="${q}"]:checked`);
+        if (val) score += parseInt(val.value);
+      });
+
+      const container = document.getElementById('risk-result');
+      container.classList.remove('hidden');
+
+      let riskLevel = '';
+      let badgeClass = '';
+      let description = '';
+
+      if (score >= 70) {
+        riskLevel = 'EXTREME RISK OF COST OVERRUN (70-100%)';
+        badgeClass = 'bg-red-500/10 text-red-400 border-red-500/30';
+        description = 'Your project is severely under-specified in high-liability zones (concurrency, idempotency, or RLS). There is an estimated 80%+ probability of budget duplication and delayed delivery due to scope disputes.';
+      } else if (score >= 35) {
+        riskLevel = 'MODERATE SCOPE VULNERABILITY (35-69%)';
+        badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        description = 'You have basic functionality covered, but critical edge cases (reconciliation, third-party circuit breakers, or integer rounding) are omitted. Expect unexpected production bugs post-launch.';
+      } else {
+        riskLevel = 'ROBUST ARCHITECTURAL MATURITY (< 35%)';
+        badgeClass = 'bg-brand-500/10 text-brand-400 border-brand-500/30';
+        description = 'Outstanding! You have prioritized defensive systems architecture and clear edge-case boundaries. Development will proceed with minimal rework.';
+      }
+
+      container.className = `mt-8 p-6 rounded-2xl border ${score >= 70 ? 'bg-red-950/20 border-red-900/40' : (score >= 35 ? 'bg-amber-950/20 border-amber-900/40' : 'bg-emerald-950/20 border-emerald-900/40')}`;
+      container.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${badgeClass}">
+            ${riskLevel}
+          </span>
+          <span class="text-2xl font-extrabold text-white font-mono">${score} / 100 Risk Index</span>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed mb-4">${description}</p>
+        <div class="text-xs text-slate-400">
+          👉 <strong>Recommended Action:</strong> Attach the relevant blueprints from <code>system-blueprint-os</code> to your Statement of Work (SOW) before hiring engineering teams.
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // 2. Generate Spec Markdown
+    function generateSpecMarkdown() {
+      const appName = document.getElementById('spec-app-name').value || 'System Spec';
+      const domain = document.getElementById('spec-domain').value;
+      const author = document.getElementById('spec-author').value || 'Tri Raida';
+
+      const selectedModules = [];
+      document.querySelectorAll('#modules-checklist input:checked').forEach(cb => {
+        selectedModules.push(cb.value);
+      });
+
+      let md = `# 📐 Functional & Edge-Case Specification: ${appName}\n`;
+      md += `> **Domain:** ${domain.toUpperCase()} | **Author:** ${author} | **Framework:** system-blueprint-os\n\n`;
+      md += `## 1. Executive Overview & Scope Boundaries\n`;
+      md += `This document defines the core business logic, database-level security policies, and edge-case handling rules for **${appName}**.\n\n`;
+      md += `### In-Scope vs Explicitly Out-of-Scope\n`;
+      md += `- **IN-SCOPE:** Core business workflow, atomic state transitions, automated audit trail, and zero-race-condition constraints.\n`;
+      md += `- **OUT-OF-SCOPE:** Unapproved third-party integrations, non-standard payment gateways, and features not covered in milestone deliverables.\n\n`;
+      
+      md += `## 2. Mandatory Architectural Constraints\n`;
+
+      if (selectedModules.includes('idempotency')) {
+        md += `### Blueprint 01: Payment Webhook Idempotency & Mutex\n`;
+        md += `- All payment webhook handlers MUST enforce unique idempotency keys: \`UNIQUE(tenant_id, gateway_name, gateway_event_id)\`.\n`;
+        md += `- Concurrent webhook retries must acquire a 60s Redis lock before modifying order status.\n\n`;
+      }
+
+      if (selectedModules.includes('concurrency')) {
+        md += `### Blueprint 02: Inventory Concurrency & Race Conditions\n`;
+        md += `- Stock decrements MUST occur within an atomic SQL update statement: \`UPDATE inventory SET available = available - 1 WHERE id = ? AND available >= 1\`.\n`;
+        md += `- Application memory checks without row-level locks are strictly forbidden.\n\n`;
+      }
+
+      if (selectedModules.includes('rls')) {
+        md += `### Blueprint 03: PostgreSQL Row-Level Security (RLS)\n`;
+        md += `- All tenant tables MUST have RLS enabled (\`FORCE ROW LEVEL SECURITY\`).\n`;
+        md += `- Connections inject \`app.current_tenant_id\` dynamically to prevent cross-tenant data leaks.\n\n`;
+      }
+
+      if (selectedModules.includes('audit')) {
+        md += `### Blueprint 04: Immutable Audit Trail\n`;
+        md += `- High-risk operations (voids, overrides, discounts > 10%) must append to an immutable WORM ledger.\n`;
+        md += `- SQL triggers must block ANY \`UPDATE\` or \`DELETE\` statements on the audit ledger table.\n\n`;
+      }
+
+      if (selectedModules.includes('rounding')) {
+        md += `### Blueprint 07: Decimal & Multi-Currency Integrity\n`;
+        md += `- All currency values MUST be stored as integers representing atomic units (cents).\n`;
+        md += `- Floating point math in financial calculations is strictly forbidden. Use Banker's Rounding.\n\n`;
+      }
+
+      if (selectedModules.includes('circuit')) {
+        md += `### Blueprint 12: Third-Party Outage Circuit Breaker\n`;
+        md += `- External notification (WhatsApp/Email) and AI calls must NEVER block synchronous checkout threads.\n`;
+        md += `- Dispatch to background queues with exponential backoff and circuit breaker failover.\n\n`;
+      }
+
+      md += `## 3. Definition of Done (DoD)\n`;
+      md += `A feature is only considered complete when:\n`;
+      md += `1. BDD Acceptance Criteria pass.\n`;
+      md += `2. Database migrations are zero-downtime compatible (\`CONCURRENTLY\` index creation, non-locking constraints).\n`;
+      md += `3. Edge cases documented above have matching automated test cases.\n`;
+
+      document.getElementById('spec-output').value = md;
+    }
+
+    function copySpec() {
+      const output = document.getElementById('spec-output');
+      output.select();
+      document.execCommand('copy');
+      const btn = document.getElementById('copy-btn-text');
+      btn.innerText = 'Copied!';
+      setTimeout(() => { btn.innerText = 'Copy Markdown'; }, 2000);
+    }
+
+    function downloadSpec() {
+      const text = document.getElementById('spec-output').value;
+      const blob = new Blob([text], { type: 'text/markdown' });
+      const anchor = document.createElement('a');
+      anchor.download = 'system-specification.md';
+      anchor.href = window.URL.createObjectURL(blob);
+      anchor.click();
+    }
+
+    // 3. Diagram Switcher
+    const diagramSources = {
+      rls: `graph TD
+    User([Tenant Operator / Staff]) -->|HTTPS / JWT| Gateway[Auth & API Gateway]
+    Gateway -->|Sets DB Session: app.current_tenant_id| Engine[Core Business Engine]
+    Engine --> RLS[PostgreSQL Kernel Row-Level Security]
+    RLS -->|Strict Isolation Policy| TenantData[(Tenant-Specific Data)]
+    RLS -.->|BLOCKED SILENTLY| OtherTenants[(Other Tenant Records)]`,
+      
+      webhook: `sequenceDiagram
+    autonumber
+    participant Gateway as Stripe / Gateway
+    participant Webhook as API Webhook Receiver
+    participant DB as PostgreSQL Core DB
+    Gateway->>Webhook: POST /webhook (Event: evt_99482)
+    Webhook->>DB: Check Idempotency Key (evt_99482)
+    alt Already Paid / Duplicate
+        DB-->>Webhook: Key Found (Status: PAID)
+        Webhook-->>Gateway: 200 OK (Stop Retrying)
+    else New Event
+        Webhook->>DB: Atomic Update Order = PAID
+        Webhook-->>Gateway: 200 OK
+    end`,
+
+      fourofeyes: `sequenceDiagram
+    autonumber
+    actor Cashier as Operator
+    participant Terminal as POS UI
+    actor Manager as Supervisor
+    participant Server as Security Engine
+    Cashier->>Terminal: Attempt Void > $100
+    Terminal-->>Cashier: Prompt: Manager Approval Required
+    Manager->>Terminal: Swipe RFID / 2FA Pin
+    Terminal->>Server: Submit Dual-Signature Void Request
+    Server->>Server: Verify Requester != Approver
+    Server-->>Terminal: Approved & Recorded in Audit Log`,
+
+      breaker: `stateDiagram-v2
+    [*] --> Closed: Normal Operation
+    Closed --> Open: Failure Rate > 50%
+    note right of Open
+        Vendor API is Down.
+        Instantly fallback to queue.
+    end note
+    Open --> HalfOpen: 60s Cool-down Elapsed
+    HalfOpen --> Closed: Probe Request Succeeds
+    HalfOpen --> Open: Probe Request Fails`
+    };
+
+    let currentDiagramKey = 'rls';
+
+    function switchDiagram(key) {
+      currentDiagramKey = key;
+      document.querySelectorAll('.diagram-tab').forEach(btn => {
+        btn.className = 'diagram-tab px-4 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white';
+      });
+      const activeTab = document.getElementById(`tab-${key}`);
+      if (activeTab) {
+        activeTab.className = 'diagram-tab px-4 py-2 rounded-lg text-xs font-bold bg-brand-500/20 text-brand-400 border border-brand-500/40';
+      }
+
+      const area = document.getElementById('mermaid-render-area');
+      area.innerHTML = `<div class="mermaid text-center text-sm">${diagramSources[key]}</div>`;
+      mermaid.run();
+    }
+
+    function copyDiagramCode() {
+      navigator.clipboard.writeText(diagramSources[currentDiagramKey]).then(() => {
+        const btn = document.getElementById('copy-diagram-btn-text');
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy Mermaid Code'; }, 2000);
+      });
+    }
+
+    // Initialize Spec Generator on load
+    window.addEventListener('DOMContentLoaded', () => {
+      generateSpecMarkdown();
+    });
+  </script>
+</body>
+</html>
