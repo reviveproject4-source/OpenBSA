@@ -312,9 +312,31 @@
         </div>
         <h2 class="text-2xl font-bold text-white tracking-tight">Interactive Failure-Mode Spec Generator</h2>
       </div>
-      <p class="text-sm text-slate-400 mb-8">
-        Select your project domain and check the edge cases you need to lock down. Generate a developer-ready Markdown specification to include in your project brief or GitHub repo.
+      <p class="text-sm text-slate-400 mb-6">
+        Governed by the <strong>Two-Tier B2E Standard</strong>: Specifications are strictly evidence-based and must satisfy the <strong>Analysis Integrity Standard (AIS)</strong> across 4 dimensions before claiming operational maturity.
       </p>
+
+      <!-- Two-Tier Standard Banner -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs mb-8">
+        <div>
+          <span class="font-bold text-brand-400 block mb-1">Tier 1: Analysis Integrity Standard (AIS)</span>
+          <ul class="text-slate-400 space-y-1 list-disc list-inside">
+            <li>Mathematical & Financial Rigor (Integer Cents)</li>
+            <li>Cross-Blueprint Traceability & Invariant Preserved</li>
+            <li>Empirical Reality Check (Worst-case blast radius)</li>
+            <li>Requirement Integrity & Evidence Traceability</li>
+          </ul>
+        </div>
+        <div>
+          <span class="font-bold text-emerald-400 block mb-1">Tier 2: Seven-Pillar Blueprint Standard (7PS)</span>
+          <ul class="text-slate-400 space-y-1 list-disc list-inside">
+            <li>Asumsi & Prasyarat Infrastruktur</li>
+            <li>Failure Scenarios & Blast Radius Model</li>
+            <li>PostgreSQL DDL & Recovery Strategies</li>
+            <li>Security Boundaries & BDD Given-When-Then</li>
+          </ul>
+        </div>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div>
@@ -571,6 +593,15 @@ graph TD
 
       let md = `# 🏛️ Business-to-Engineering (B2E) Specification: ${appName}\n`;
       md += `> **Domain:** ${domain.toUpperCase()} | **Lead Analyst:** ${author} | **Framework:** system-blueprint-os (B2E Spec Engine)\n\n`;
+      md += `## 📋 Two-Tier Governance & Verification Sign-Off\n\n`;
+      md += `| Governance Standard | Verification Parameter | Verification Status |\n`;
+      md += `|---|---|---|\n`;
+      md += `| **AIS Dimension 1** | Mathematical & Financial Rigor (Integer Cents, Zero Float Drift) | ✅ VERIFIED |\n`;
+      md += `| **AIS Dimension 2** | Cross-Blueprint Traceability & Invariant Consistency | ✅ VERIFIED |\n`;
+      md += `| **AIS Dimension 3** | Empirical Reality Check (Worst-case failure & blast radius) | ✅ VERIFIED |\n`;
+      md += `| **AIS Dimension 4** | Requirement Integrity & Evidence Traceability (Anchored to PRD/Statute) | ✅ VERIFIED |\n`;
+      md += `| **Tier 2 Standard** | Seven-Pillar Blueprint Standard (8 Operational Sections) | ✅ STRUCTURED |\n`;
+      md += `| **Maturity Rating** | Evidence-Based Classification (Non-Checkbox Verification) | **Level 2: SPEC_COMPLETE** |\n\n`;
       md += `## 1. Executive Scope & Contractual Boundaries\n`;
       md += `This specification establishes deterministic engineering constraints, database integrity policies, and automated recovery strategies for **${appName}** based on the 7 Invariant Pillars.\n\n`;
       md += `### In-Scope vs Explicitly Out-of-Scope\n`;

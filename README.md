@@ -20,19 +20,26 @@
 
 ---
 
-## 🏛️ Not Just Documents: A Formal B2E Specification Framework
+## 🏛️ The Two-Tier Governance Standard: Substance Over Checkboxes
 
-`system-blueprint-os` is not a loose collection of 14 markdown files. It is an operational **Business-to-Engineering (B2E) Specification Framework** designed to bridge the chasm between commercial business operators and software engineering teams.
+`system-blueprint-os` is not a casual library of 14 markdown files. It is an operational **Business-to-Engineering (B2E) Specification Framework** designed to bridge the chasm between commercial business operators and software engineering teams.
 
-Every single blueprint in this repository strictly adheres to the **7 Invariant Engineering Pillars**:
-1. **Assumptions (Asumsi):** Environmental, infrastructure, and volume baselines.
-2. **Prerequisites (Prasyarat):** Technical tooling, libraries, and organizational prerequisites.
-3. **Failure Scenario & Blast Radius:** The detailed catastrophe, monetary loss, and systems affected.
-4. **Architectural Specification & DDL:** Executable PostgreSQL schemas, constraints, and Mermaid flows.
-5. **Recovery Strategy & Self-Healing:** Automated reconcilers, DLQ workers, and manual rollback runbooks.
-6. **Security Boundary & Access Scope:** Least privilege, RLS policies, and immutable audit boundaries.
-7. **Test Scenarios (BDD):** Given-When-Then positive, negative, and concurrency stress vectors.
-8. **Batasan Penerapan (Trade-offs):** Concrete contraindications defining when **NOT** to use the blueprint.
+> **Crucial Rule:** In this framework, **no blueprint may claim "Enterprise-Ready" status simply because all headings are filled.** Readiness is strictly evidence-based, governed by two independent layers of scrutiny:
+
+### 1. Analysis Integrity Standard (AIS) — 4 Mandatory Dimensions
+1. **Mathematical & Financial Rigor:** Strict atomic integer cents, zero floating-point math, and Banker's Rounding to eliminate tax ledger drift.
+2. **Cross-Blueprint Traceability & Consistency:** Zero invariant collisions (e.g. GDPR pseudonymization in BP-08 preserves financial invoices in BP-07 and hash chains in BP-04).
+3. **Empirical Reality Check:** Models worst-case infrastructure chaos: severed store Wi-Fi cables, rogue employee voids, webhook retry storms, and vendor API outages.
+4. **Requirement Integrity & Evidence Traceability:** Every architectural decision and table schema is bidirectionally traceable to a verified business need, legal statute (GDPR Art 17, IRS § 6001), or signed stakeholder contract (ADR).
+
+### 2. Seven-Pillar Blueprint Standard (7PS) — The 8 Structural Sections
+Every blueprint provides complete operational engineering controls:
+`1. Assumptions` • `2. Prerequisites` • `3. Failure Scenario & Blast Radius` • `4. Architecture & Executable DDL` • `5. Recovery Strategy & Self-Healing` • `6. Security Boundary` • `7. Test Scenarios (BDD)` • `8. Batasan Penerapan (Trade-offs)`.
+
+### 3. Evidence-Based Maturity System
+* 🟡 **Level 1: `PROPOSED`** — Initial concept and failure narrative documented.
+* 🔵 **Level 2: `SPEC_COMPLETE`** — Passed all 4 AIS dimensions, full 7PS anatomy authored, BDD test suite verified.
+* 🟢 **Level 3: `BATTLE-TESTED`** — Empirically proven in live production (e.g. [ROTARI Retail Engine](https://github.com/reviveproject4-source/ROTARI)), stress-tested against race conditions, or verified via live database constraint benchmarks.
 
 👉 **[Read the complete Framework Governance & Methodology in FRAMEWORK.md](./FRAMEWORK.md)**
 

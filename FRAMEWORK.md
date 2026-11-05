@@ -1,102 +1,140 @@
 # 🏛️ The Business-to-Engineering (B2E) Specification Framework
-
-> **A Formal Architectural Methodology for Translating Business Risk, Operational Realities, and Financial Constraints into Developer-Ready Systems Specifications.**
-
----
-
-## 1. What Makes This a Framework, Not Just a Template Library?
-
-A document collection is static; **a framework is an operational methodology with strict rules, structural invariants, and governance.**
-
-Traditional Business Analysis produces bulky Word documents that software engineers ignore. Traditional Software Engineering produces technical implementations that business stakeholders don't understand—leading to costly post-launch failures.
-
-The **Business-to-Engineering (B2E) Specification Framework** establishes a deterministic bridge between business intent and database/code enforcement.
-
-```mermaid
-graph LR
-    classDef biz fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef b2e fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
-    classDef eng fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    Biz[Business Intent & Operational Reality<br/><i>Margins, Cash Flow, Fraud, Staff Friction</i>]:::biz --> B2E[B2E Specification Engine<br/><i>system-blueprint-os</i>]:::b2e
-    B2E --> Eng[Deterministic Engineering Enforcement<br/><i>SQL DDL, Mutexes, RLS, BDD Suites</i>]:::eng
-```
+> **An Evidence-Based Architectural Methodology for Translating Business Risk, Operational Realities, and Financial Constraints into Verifiable Systems Specifications.**
 
 ---
 
-## 2. The 5 Functional Layers of the B2E Framework
+## 1. The Core Philosophy: Substance Over Checkboxes
 
-Every system specification in `system-blueprint-os` is mapped across five architectural layers:
+In `system-blueprint-os` (OpenBSA), **no blueprint may claim "Enterprise-Ready" status simply because all template sections are filled.**
+
+Completing seven structural headings is merely a syntactic prerequisite. True readiness is governed by **substantive analysis quality, empirical verification, mathematical proof, and operational traceability.**
+
+To enforce this rigor, the framework operates on **The Two-Tier Governance Standard**:
 
 ```mermaid
 graph TD
-    classDef l1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef l2 fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef l3 fill:#ede7f6,stroke:#512da8,stroke-width:2px;
-    classDef l4 fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
-    classDef l5 fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    classDef t1 fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef t2 fill:#ede7f6,stroke:#512da8,stroke-width:2px;
+    classDef m fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
 
-    L5[Layer 5: Scope & Contract Governance<br/><i>BP-05 Anti-Scope Creep Pact, 4-Tier DoD</i>]:::l5 --> L4
-    L4[Layer 4: Resilience & Third-Party Circuitry<br/><i>BP-11 Bulk Quarantine, BP-12 Circuit Breaker, BP-13 Toll Fraud</i>]:::l4 --> L3
-    L3[Layer 3: Security, Governance & Human Risk<br/><i>BP-03 Multi-Tenant RLS, BP-04 Audit Ledger, BP-08 GDPR vs Tax, BP-10 Four-Eyes</i>]:::l3 --> L2
-    L2[Layer 2: Concurrency & State Machine Integrity<br/><i>BP-02 Inventory Race Conditions, BP-09 Offline Sync, BP-14 Zero-Downtime Migration</i>]:::l2 --> L1
-    L1[Layer 1: Financial & Transaction Ledger Integrity<br/><i>BP-01 Webhook Idempotency, BP-06 Dispute Cascades, BP-07 Integer Rounding</i>]:::l1
+    subgraph Tier 1: Analysis Integrity Standard (AIS)
+        A1[1. Mathematical & Financial Rigor]:::t1
+        A2[2. Cross-Blueprint Consistency]:::t1
+        A3[3. Empirical Reality Check]:::t1
+        A4[4. Requirement Integrity & Evidence Traceability]:::t1
+    end
+
+    subgraph Tier 2: Seven-Pillar Blueprint Standard (7PS)
+        P1[1. Assumptions & 2. Prerequisites]:::t2
+        P2[3. Failure Scenario & Blast Radius]:::t2
+        P3[4. Architecture & Executable DDL]:::t2
+        P4[5. Recovery Strategy & Self-Healing]:::t2
+        P5[6. Security Boundary & Access Scope]:::t2
+        P6[7. Test Scenarios BDD]:::t2
+        P7[8. Batasan Penerapan / Trade-offs]:::t2
+    end
+
+    Tier 1 --> VerificationGate{Verification & Evidence Gate}
+    Tier 2 --> VerificationGate
+    VerificationGate --> Maturity[Evidence-Based Maturity Rating<br/><i>Level 1: PROPOSED -> Level 2: SPEC_COMPLETE -> Level 3: BATTLE-TESTED</i>]:::m
 ```
 
 ---
 
-## 3. The 7 Invariant Rules of Every Blueprint (The Mandatory Anatomy)
+## 2. Tier 1: The Analysis Integrity Standard (AIS) — 4 Mandatory Dimensions
 
-In `system-blueprint-os`, no blueprint is valid unless it satisfies all seven architectural dimensions:
+Before any architectural solution or code is accepted, the business systems analysis must pass all four integrity dimensions:
+
+### Dimension 1: Mathematical & Financial Rigor
+* Every currency, quantity, fee, and tax computation must be mathematically provable.
+* Binary floating-point arithmetic (`FLOAT`/`DOUBLE`) is strictly prohibited in financial ledgers. All monetary values must adhere to the **Atomic Integer Cent Invariant** and use standardized **Banker's Rounding (Half-Even)** to eliminate cumulative tax drift.
+
+### Dimension 2: Cross-Blueprint Traceability & Consistency
+* A rule in Blueprint X must never break, contradict, or invalidate an invariant in Blueprint Y.
+* *Example:* The GDPR Right to Erasure procedure in BP-08 **must not** delete historical billing invoices required by the Financial Ledger in BP-07, nor may it break the cryptographic SHA-256 hash chaining of the Immutable Audit Trail in BP-04.
+
+### Dimension 3: Empirical Reality Check
+* Specifications must never assume an idealized world where networks never fail, employees are 100% honest, customers enter valid data, or third-party vendors maintain 100% SLA.
+* Every specification must model real-world chaos: severed Wi-Fi cables, malicious insider actions, webhook retry bursts, and third-party API freezes.
+
+### Dimension 4: Requirement Integrity & Evidence Traceability
+* **Every single design decision, constraint, and table schema must be bidirectionally traceable** to a concrete business requirement, verified regulatory law, or signed stakeholder decision.
+* Arbitrary engineering preferences are rejected. Each constraint must document:
+  1. *Originating Business Problem:* What commercial pain or operational leak does this solve?
+  2. *Verified Fact / Precedent:* What empirical law, tax code (e.g. IRS § 6001, GDPR Art 17), or RFC standard mandates this?
+  3. *Traceable Requirement ID:* Direct mapping to the project's PRD, BRD, or Architectural Decision Record (ADR).
+
+---
+
+## 3. Tier 2: The Seven-Pillar Blueprint Standard (7PS)
+
+Every blueprint specification must provide complete operational controls across eight structural sections:
+
+| Pillar | Engineering Mandate | Verification Criteria |
+|---|---|---|
+| **1. Assumptions** | Baseline conditions of the business environment, data volume, and hardware. | What must be true for this blueprint to be applicable? |
+| **2. Prerequisites** | Concrete infrastructure, versions, and libraries required before coding. | e.g. PostgreSQL 14+, Redis 6.2+, Turnstile keys. |
+| **3. Failure Scenario** | Detailed narrative of the nightmare breakdown, direct monetary loss, and blast radius. | Exactly what breaks, which tables corrupt, and how much money is lost? |
+| **4. Architecture & DDL** | Native Mermaid sequence/state diagrams and production-ready SQL constraints. | Executable DDL: `CHECK`, `UNIQUE`, RLS policies, PL/pgSQL triggers. |
+| **5. Recovery Strategy** | Automated self-healing, reconciliation crons, DLQ queues, and manual runbooks. | How does the system fix itself without human panic when failure strikes? |
+| **6. Security Boundary** | Least privilege, session immutability, role separation, and tamper prevention. | Who can trigger the action, and who is strictly prohibited? |
+| **7. Test Scenarios** | Given-When-Then BDD test cases covering happy path, edge failure, and concurrency spikes. | Verifiable automated testing acceptance criteria. |
+| **8. Batasan Penerapan** | Architectural honesty: clear contraindications defining when **NOT** to use this pattern. | When is this pattern overkill, contraindicated, or too complex? |
+
+---
+
+## 4. The Evidence-Based Maturity Rating System (Kelayakan Berbasis Bukti)
+
+Every blueprint in `system-blueprint-os` carries an explicit, honest **Maturity Rating Badge**:
 
 ```mermaid
-flowchart TD
-    A["1. Assumptions (Asumsi)"] --> B["2. Prerequisites (Prasyarat)"]
-    B --> C["3. Failure Scenario & Blast Radius (Mimpi Buruk & Skenario Kegagalan)"]
-    C --> D["4. Architectural Blueprint & DDL (Spesifikasi Arsitektur & Database)"]
-    D --> E["5. Recovery Strategy (Strategi Pemulihan & Self-Healing)"]
-    E --> F["6. Security Boundary (Batas Keamanan & Hak Akses)"]
-    F --> G["7. Test Scenarios (Skenario Pengujian BDD: Positif, Negatif, Stress)"]
-    G --> H["8. Batasan Penerapan (Applicability & Architectural Trade-offs)"]
+stateDiagram-v2
+    [*] --> Level1_Proposed: Initial Concept Drafted
+    Level1_Proposed --> Level2_SpecComplete: Passes Tier 1 (AIS 4 Dimensions) + Tier 2 (7PS Anatomy)
+    Level2_SpecComplete --> Level3_BattleTested: Verified with Live Production Evidence (ROTARI / Stress Benchmarks)
 ```
 
-| Section | Definition & Purpose | Verification Criteria |
-|---|---|---|
-| **1. Assumptions** | Baseline conditions of the business environment and infrastructure. | What must be true for this blueprint to be valid? |
-| **2. Prerequisites** | Technical, operational, or vendor dependencies needed prior to implementation. | Required tools (e.g. PostgreSQL 14+, Redis, PubSub). |
-| **3. Failure Scenario** | Detailed real-world failure mode, financial loss model, and blast radius. | Exactly what breaks and how much money/data is lost? |
-| **4. Architecture & DDL** | Native Mermaid flows, state machines, and production SQL constraints. | Visual process map + executable database definitions. |
-| **5. Recovery Strategy** | Automated self-healing, reconciliation workers, DLQ, and manual rollback protocols. | How does the system fix itself without human panic? |
-| **6. Security Boundary** | Principle of least privilege, data isolation policies, and non-repudiation limits. | Who can trigger it, and who is strictly prohibited? |
-| **7. Test Scenarios** | Given-When-Then BDD test cases covering happy path, edge-case failure, and race conditions. | Verifiable automated testing acceptance criteria. |
-| **8. Batasan Penerapan** | Clear contraindications: when **NOT** to use this blueprint and the architectural trade-offs. | When is this pattern overkill or contraindicated? |
+### Level 1: `PROPOSED / DRAFT` 🟡
+* The problem statement and initial architecture flow are documented.
+* Sections are still under active review or missing empirical validation.
+* **Status:** Experimental. Not yet approved for client contractual use.
+
+### Level 2: `SPEC_COMPLETE` 🔵
+* All 4 dimensions of the **Analysis Integrity Standard (AIS)** have been verified.
+* All 8 sections of the **Seven-Pillar Blueprint Standard (7PS)** are fully authored.
+* Gherkin BDD test scenarios have been designed and peer-reviewed.
+* **Status:** Ready for implementation and sprint planning.
+
+### Level 3: `BATTLE-TESTED / VERIFIED` 🟢
+* **Empirically Proven:** The specification has been deployed in a live production environment (such as **ROTARI** multi-tenant retail platform), survived real-world concurrency loads, or passed automated database integration stress tests.
+* Zero unresolved edge-case vulnerabilities.
+* **Status:** Gold standard reference architecture.
 
 ---
 
-## 4. The 4-Phase Implementation Lifecycle
-
-When adopting the framework on a software project, follow this four-phase lifecycle:
+## 5. The 4-Phase Governance Lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Founder as Founder / Business Operator
-    actor BSA as Business Systems Analyst
-    actor Lead as Lead Engineer / Agency
+    actor Founder as Business Founder / Operator
+    actor Analyst as Lead Systems Analyst (Tri Raida)
+    actor Architect as Lead Software Architect
 
-    Note over Founder,Lead: Phase 1: Inception & Scope Freeze
-    Founder->>BSA: Share operational workflows, margins, and expansion goals
-    BSA->>Lead: Issue BP-05 Anti-Scope Creep Agreement with signed In-Scope / Out-of-Scope boundaries
-    
-    Note over Founder,Lead: Phase 2: Architectural Modeling
-    BSA->>Lead: Deliver Blueprints (Layers 1, 2, 3: Schemas, Mutexes, RLS, Banker's Rounding)
-    Lead-->>BSA: Approve technical feasibility & implement SQL constraints in Staging
-    
-    Note over Founder,Lead: Phase 3: Resilience & Fault Injection
-    Lead->>Lead: Implement Layer 4 (Circuit Breakers, Quarantine Pipelines, Toll Fraud Shields)
-    BSA->>Lead: Run Chaos / Failure Simulation against Test Scenarios
+    Note over Founder,Architect: Phase 1: Requirement Integrity Audit
+    Founder->>Analyst: State commercial goals, operational friction, and revenue leaks
+    Analyst->>Analyst: Apply AIS Dimension 4 (Requirement Integrity & Evidence Traceability)
+    Analyst->>Founder: Deliver BP-05 Scope Agreement with explicit Out-of-Scope lists
 
-    Note over Founder,Lead: Phase 4: Operational Sign-Off
-    BSA->>Founder: Demonstrate automated recovery and audit trail reports
-    Founder->>Lead: Release milestone payments against verified 4-Tier DoD
+    Note over Founder,Architect: Phase 2: Structural 7-Pillar Modeling
+    Analyst->>Architect: Issue Tier 2 Blueprint Specifications (Schemas, DDL, State Machines)
+    Architect->>Analyst: Validate technical feasibility against PostgreSQL/Redis prerequisites
+
+    Note over Founder,Architect: Phase 3: Cross-Blueprint Consistency Audit
+    Analyst->>Analyst: Run AIS Dimension 2 Check (GDPR vs Tax, Concurrency vs Offline Sync)
+    Architect->>Architect: Deploy DDL constraints and BDD test suites in Staging
+
+    Note over Founder,Architect: Phase 4: Production Verification & Sign-off
+    Architect->>Analyst: Execute concurrency stress test and automated self-healing crons
+    Analyst->>Founder: Present verified audit reports; milestone approved for deployment
 ```

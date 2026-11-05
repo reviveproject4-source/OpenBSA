@@ -1,5 +1,6 @@
-# 📑 Blueprint Specification Template (The 7-Pillar Standard)
-> **Use this standard template when authoring or contributing new blueprints to `system-blueprint-os`. All seven sections are mandatory.**
+# 📑 Blueprint Specification Template (The Two-Tier Standard)
+> **Use this standard template when authoring or contributing new blueprints to `system-blueprint-os`.**  
+> *Compliance with both Tier 1 (Analysis Integrity Standard) and Tier 2 (Seven-Pillar Standard) is mandatory before a blueprint can be merged.*
 
 ---
 
@@ -9,27 +10,45 @@
 
 ---
 
+## 📋 Governance & Verification Metadata
+
+| Attribute | Specification Value | Verification Standard |
+|---|---|---|
+| **Blueprint ID** | `BP-XX` | Unique sequential identifier |
+| **Architectural Layer** | `[Layer 1: Financial / Layer 2: Concurrency / Layer 3: Security / Layer 4: Resilience / Layer 5: Scope]` | [FRAMEWORK.md](../FRAMEWORK.md) |
+| **Maturity Rating** | `[Level 1: PROPOSED / Level 2: SPEC_COMPLETE / Level 3: BATTLE-TESTED]` | Evidence-Based Maturity System |
+| **Empirical Evidence** | `[e.g. Deployed in ROTARI Production / Verified via pgTAP Integration Tests / Staging Benchmark]` | Empirical verification reference |
+| **Requirement Anchor** | `[e.g. PRD-Req-402 / GDPR Article 17(3)(b) / IRS Code § 6001 / ADR-014]` | Traceability source link |
+
+### Analysis Integrity Standard (AIS) Verification Sign-off:
+- [ ] **1. Mathematical & Financial Rigor:** Monetary/numeric amounts use atomic integer units; Banker's Rounding verified against tax drift.
+- [ ] **2. Cross-Blueprint Consistency:** Confirmed zero invariant collisions with dependent blueprints (e.g. GDPR vs Tax Ledger, Offline vs Online Locks).
+- [ ] **3. Empirical Reality Check:** Models worst-case infrastructure failures (network timeouts, rogue employees, vendor outages).
+- [ ] **4. Requirement Integrity & Evidence Traceability:** Design decisions are directly anchored to verified business problems or legal statutes, not arbitrary preferences.
+
+---
+
 ## 1. Assumptions (Asumsi)
 *Document the underlying business, infrastructure, and environmental assumptions.*
-* **Business Assumption:** e.g., The business operates a multi-outlet retail model with central inventory.
-* **Architecture Assumption:** e.g., A relational database with ACID compliance (PostgreSQL) is the source of truth.
-* **Volume Assumption:** e.g., The system handles up to 500 concurrent checkout requests per second.
+* **Business Assumption:** e.g., Multi-outlet retail business with central inventory reconciliation.
+* **Architecture Assumption:** e.g., Relational database (PostgreSQL 14+) acts as single source of truth.
+* **Volume Baseline:** e.g., Sustains bursts of up to 500 concurrent checkout requests per second.
 
 ---
 
 ## 2. Prerequisites (Prasyarat)
 *List all infrastructure, dependencies, libraries, and organizational agreements required before implementation.*
-* **Infrastructure:** e.g., PostgreSQL 14+, Redis 6.2+ for distributed locks.
-* **Vendor Configuration:** e.g., Payment Gateway configured with webhook signature verification keys.
-* **Organizational:** e.g., Management approval of the refund policy and SLA definitions.
+* **Infrastructure:** e.g., PostgreSQL 14+, Redis 6.2+ for distributed lock coordination.
+* **Security & Tokens:** e.g., Telephony API keys stored in encrypted environment vaults.
+* **Organizational Sign-off:** e.g., Formal management approval of refund escrow windows.
 
 ---
 
 ## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
 *Detail the catastrophic failure scenario if this blueprint is omitted.*
-* **The Failure Story:** [Narrative describing what triggers the breakdown]
-* **Financial Impact:** [Direct monetary loss, fraud exposure, or chargeback fees]
-* **Blast Radius:** [Which users, systems, or downstream tables are corrupted or affected]
+* **The Failure Story:** [Narrative describing the exact chain of failure]
+* **Direct Financial Impact:** [Specific dollar loss, fraud liability, or regulatory fines]
+* **Blast Radius:** [Which downstream tables, services, or customer groups are affected]
 
 ---
 
@@ -43,7 +62,7 @@ sequenceDiagram
 ```
 
 ```sql
--- Production-Ready SQL Constraints & Tables
+-- Production DDL: Executable SQL Constraints & Tables
 CREATE TABLE example (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 );
@@ -53,17 +72,17 @@ CREATE TABLE example (
 
 ## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
 *How the system heals itself when network drops, servers crash, or unexpected anomalies occur.*
-* **Automated Self-Healing:** e.g., Scheduled cron reconcilers, retry workers with exponential backoff.
-* **Dead-Letter Queue (DLQ) & Quarantine:** e.g., Poison messages moved to manual inspection queues.
-* **Manual Operational Runbook:** e.g., Step-by-step instructions for support staff when automated recovery fails.
+* **Automated Self-Healing:** e.g., Scheduled cron reconciler, exponential backoff with jitter.
+* **Dead-Letter Queue (DLQ):** e.g., Failed payloads routed to quarantine queue for inspection.
+* **Manual Operational Runbook:** e.g., Standard Operating Procedure (SOP) for support personnel.
 
 ---
 
 ## 6. Security Boundary & Access Scope (Batas Keamanan)
 *Access control, data isolation, and tamper prevention.*
-* **Principle of Least Privilege:** e.g., Application web workers have only `INSERT/SELECT` rights, not `DROP/TRUNCATE`.
-* **Multi-Tenant Isolation:** e.g., PostgreSQL Row-Level Security (RLS) enforcement.
-* **Immutable Chain of Custody:** e.g., Cryptographic hashing preventing retroactive edits.
+* **Principle of Least Privilege:** e.g., Web API role has only `SELECT/UPDATE` permissions, zero DDL rights.
+* **Multi-Tenant Row-Level Security:** e.g., PostgreSQL RLS policy enforcement.
+* **Chain of Custody:** e.g., Cryptographic hashing preventing retroactive record alteration.
 
 ---
 
@@ -92,7 +111,7 @@ Feature: [Feature Name]
 ---
 
 ## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
-*Architectural honesty: every pattern has trade-offs. Define when this blueprint should NOT be applied.*
-* **Contraindications:** e.g., Do not use this pattern for simple read-heavy static blogs or prototypes where Redis overhead is unjustified.
-* **Performance Overhead:** e.g., Distributed locking adds 5-15ms of latency per transaction.
-* **Complexity Burden:** e.g., Requires ongoing monitoring of Redis memory utilization and connection pools.
+*Architectural honesty: define when this blueprint should NOT be applied.*
+* **Contraindications:** e.g., Do not use for zero-cost free trial checkouts or early 48-hour hackathons.
+* **Performance Overhead:** e.g., Distributed locking adds 2–6ms of latency per transaction.
+* **Operational Complexity:** e.g., Requires ongoing monitoring of Redis memory utilization and TTL expiry.
