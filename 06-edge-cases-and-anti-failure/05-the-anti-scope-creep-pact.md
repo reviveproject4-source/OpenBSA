@@ -1,21 +1,30 @@
 # Blueprint 05: The Anti-Scope Creep Pact & Definition of Done
 
-> **Target Problem:** A client asks for "a simple dashboard like Shopify". Halfway through development, the client says: "Where is the multi-currency crypto checkout and AI auto-restocking? I assumed that was included!" The developer feels exploited, the client feels cheated, and the project descends into legal threats.
+> **Target Problem:** A client asks for "a simple dashboard like Shopify". Halfway through development, the client says: "Where is the multi-currency crypto checkout and AI auto-restocking? I assumed that was included!" The developer feels exploited, the client feels cheated, and the project descends into legal threats and unpaid milestones.
 
 ---
 
-## 1. The Nightmare Scenario
-A software agency quotes a founder $25,000 to build an inventory and ordering platform. 
-Three months in, the founder remarks casually: *"Oh, we also need this to sync automatically with our 3 physical POS machines via Bluetooth, and we need offline batch sync."*
-The agency says that will cost an extra $15,000. 
-The founder refuses to pay: *"You promised me a complete inventory system! If it doesn't work with my offline stores, it's useless! I'm withholding the final $10,000 payment until you build it."*
-The project stalls for 8 months. Both sides lose money.
+## 1. Assumptions (Asumsi)
+* **The "Obvious" Fallacy:** Business stakeholders assume complex edge cases (offline sync, multi-currency, fraud gates) are "standard features included by default".
+* **Fixed-Price / Fixed-Scope Vulnerability:** Software agreements without an explicit "Out-of-Scope" negative list will experience an average of 45% unbudgeted scope expansion.
+* **The Definition of Done Gap:** Developers consider a task done when code runs on their local machine; business stakeholders consider it done only when edge cases, training, and zero-downtime migrations succeed.
 
 ---
 
-## 2. Architectural Blueprint: The Scope Boundary Specification
+## 2. Prerequisites (Prasyarat)
+* **Pre-Kickoff Execution:** This blueprint must be signed by both the Lead Business Analyst/Founder and the Lead Engineer **prior to the release of deposit funds or sprint kickoff**.
+* **Traceability Matrix Tool:** A project management tool (Jira, Linear, GitHub Projects) mapped directly to this agreement's ticket identifiers.
 
-Every feature in the backlog MUST have an explicit **IN-SCOPE** vs **OUT-OF-SCOPE** boundary documented in the project contract before engineering starts.
+---
+
+## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
+* **The Failure Story:** An agency quotes $25,000 to build an inventory and ordering platform. Three months into the build, the client states: *"We also need this to sync in real-time with our 3 physical POS machines via Bluetooth, and we need offline batch sync."* The agency requests $15,000 in additional fees. The founder refuses to pay and withholds the final $10,000 milestone payment. The project stalls for 8 months.
+* **Financial Impact:** $10,000 unpaid agency revenue, $25,000 wasted client capital, and legal fees.
+* **Blast Radius:** Project cancellation, developer team demoralization, and delayed market entry.
+
+---
+
+## 4. Architectural Blueprint & Specification (Spesifikasi Batasan Scope)
 
 ```mermaid
 graph TD
@@ -23,57 +32,79 @@ graph TD
     classDef outScope fill:#ffebee,stroke:#c62828,stroke-width:2px;
     classDef crProcess fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
 
-    Feature[Feature: Multi-Channel Inventory Management] --> InScope[IN-SCOPE for v1.0 MVP]:::inScope
-    Feature --> OutScope[EXPLICITLY OUT-OF-SCOPE for v1.0]:::outScope
+    Contract[Feature Agreement: Multi-Channel Inventory Management] --> InScope[IN-SCOPE for v1.0 MVP]:::inScope
+    Contract --> OutScope[EXPLICITLY OUT-OF-SCOPE for v1.0]:::outScope
 
-    InScope --> S1[Web Admin Dashboard]:::inScope
-    InScope --> S2[Single-Currency USD & Tax Calculations]:::inScope
-    InScope --> S3[Standard Webhook Restocking Trigger]:::inScope
+    InScope --> S1[Web Admin Dashboard & CRUD]:::inScope
+    InScope --> S2[Single Currency USD & Tax Calculations]:::inScope
+    InScope --> S3[Standard Webhook Restocking Triggers]:::inScope
 
     OutScope --> O1[Hardware Bluetooth POS Sync]:::outScope
     OutScope --> O2[Multi-Currency Exchange Rate Hedging]:::outScope
     OutScope --> O3[AI Autonomous Restock Purchasing]:::outScope
 
-    OutScope -.->|Client Requests Out-of-Scope Feature| CR[Formal Change Request Protocol<br/><i>New Budget + New Timeline Approval</i>]:::crProcess
+    OutScope -.->|Stakeholder Requests Out-of-Scope Feature| CR[Formal Change Request Protocol<br/><i>New Budget + Timeline Extension</i>]:::crProcess
 ```
 
 ---
 
-## 3. The 4-Tier "Definition of Done" (DoD) Checklist
-
-A feature is NOT complete simply because the developer says "it runs on my localhost machine". A feature is only complete when all 4 tiers pass:
-
-| Tier | Gate | Requirement | Verification Method |
-|---|---|---|---|
-| **Tier 1** | **Functional** | The Given-When-Then acceptance criteria pass. | Automated E2E test or QA test sign-off |
-| **Tier 2** | **Edge-Case** | Handles bad inputs, null states, and error timeouts gracefully. | Negative test cases executed |
-| **Tier 3** | **Security** | Multi-tenant RLS checks pass; actor permissions verified. | Automated security regression suite |
-| **Tier 4** | **Operational** | Migration script runs in staging without table lock timeouts; rollback script exists. | DevOps Staging deployment log |
-
----
-
-## 4. The Formal Change Request (CR) Protocol Template
-
-When a client or business stakeholder requests a change during active development, this standard document is generated:
+## 5. Recovery Strategy: The Formal Change Request (CR) Protocol
+When an unbudgeted feature is requested during development, engineering does NOT debate or argue. They execute the standard CR Protocol:
 
 ```markdown
-### 📋 Change Request Form (CR-042)
-* **Date:** 2026-11-05
-* **Requested By:** [Founder / Stakeholder Name]
-* **Feature Title:** Add Offline Bluetooth Hardware Sync to POS
-* **Original Scope Status:** EXPLICITLY OUT-OF-SCOPE in Master Service Agreement (Section 3.2).
+### 📋 Change Request Form (CR-Template)
+* **Date:** [YYYY-MM-DD]
+* **Requested By:** [Stakeholder Name]
+* **Feature Title:** [Feature Name]
+* **Contract Status:** EXPLICITLY OUT-OF-SCOPE in Master Specification (Section 3).
 
 #### Impact Analysis:
-1. **Engineering Effort Required:** 85 developer hours
-2. **Timeline Impact:** Delays Release v1.0 by 3 weeks (New Target Launch: Dec 15 -> Jan 05)
-3. **Financial Adjustment:** +$6,800 USD (Billed at agreed contract hourly rate)
-4. **Architectural Trade-offs:** Requires local SQLite cache layer on client tablets and sync conflict resolution engine.
+1. **Engineering Effort:** [X] Developer Hours
+2. **Timeline Impact:** Extends Target Release Date by [Y] Weeks
+3. **Financial Adjustment:** +$[Z] USD (Billed at agreed contract hourly rate)
+4. **Architectural Trade-offs:** [Performance or infrastructure impacts]
 
-#### Decision:
-* [ ] **Option A: Approve & Fund.** Add $6,800 to invoice, extend launch deadline to Jan 05.
-* [ ] **Option B: Defer to Version 2.0.** Launch v1.0 on schedule; build this as the first post-launch enhancement.
-* [ ] **Option C: Scope Swap.** Remove Feature X (Automated PDF reporting) to maintain original budget and launch date.
-
-*Signed by Client:* ___________________________  *Date:* ____________
-*Signed by Lead Analyst:* _____________________  *Date:* ____________
+#### Stakeholder Decision (Select One):
+* [ ] **Option A: Approve & Fund.** Add $[Z] to invoice, extend release date by [Y] weeks.
+* [ ] **Option B: Defer to Version 2.0.** Launch v1.0 on schedule; prioritize for post-launch sprint.
+* [ ] **Option C: Scope Swap.** Remove Feature [Name] of equal effort to maintain original budget.
 ```
+
+---
+
+## 6. Security Boundary: The 4-Tier "Definition of Done" (DoD) Gate
+No pull request or milestone payment is released until all 4 verification gates pass:
+
+| Tier | Gate | Engineering Verification | Sign-off Authority |
+|---|---|---|---|
+| **Tier 1** | **Functional** | BDD Given-When-Then acceptance criteria pass. | QA Engineer |
+| **Tier 2** | **Edge-Case** | Handles bad inputs, null states, and network timeouts. | Lead Developer |
+| **Tier 3** | **Security** | RLS tenant isolation verified; least privilege enforced. | Security Architect |
+| **Tier 4** | **Operational** | Migration script runs in staging without table locks. | DevOps / DBA |
+
+---
+
+## 7. Test Scenarios (Skenario Pengujian)
+
+```gherkin
+Feature: Scope Creep Governance & Change Control
+
+  Scenario: Feature Request is Within In-Scope Boundaries
+    Given a task "User Password Reset via Email" is listed under "IN-SCOPE"
+    When the developer submits the feature meeting the 4-Tier DoD
+    Then the task is approved for milestone payout without additional negotiation
+
+  Scenario: Stakeholder Requests Out-of-Scope Capability
+    Given a client asks for "Automated WhatsApp Invoice Notifications"
+    And "WhatsApp API" is explicitly documented under "OUT-OF-SCOPE for v1.0"
+    When the request is submitted during active sprint development
+    Then the system triggers the Formal Change Request Form
+    And development on the core sprint continues uninterrupted
+    And the new feature is NOT started until Change Request funding is signed
+```
+
+---
+
+## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
+* **Contraindications:** Do not implement for exploratory R&D labs, 48-hour hackathons, or internal proof-of-concept prototypes where rapid experimentation takes priority over contractual boundaries.
+* **Overhead:** Adds 1-2 hours of administrative overhead per significant change request.

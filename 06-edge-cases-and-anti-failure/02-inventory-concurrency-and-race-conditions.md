@@ -1,118 +1,142 @@
 # Blueprint 02: Inventory Concurrency & Race Conditions
 
-> **Target Problem:** There is only 1 unit of a hot product left. Three customers click "Buy Now" at the exact same millisecond. Without pessimistic locking or atomic checks, the database allows all 3 checkouts to pass, creating 2 backorders, an angry customer dispute, and negative stock numbers.
+> **Target Problem:** There is only 1 unit of a high-demand product left. Three customers click "Buy Now" at the exact same millisecond. Without database-enforced pessimistic locking or atomic decrement guards, the system bills all 3 users, creating negative stock, backorders, and customer refund disputes.
 
 ---
 
-## 1. The Nightmare Scenario
-During a limited flash sale, your e-commerce platform sells 50 limited-edition jackets. 1,000 users hit the checkout API concurrently.
-Because the developer used naive read-then-write code:
-```javascript
-// NAIVE CODE (DISASTER WAITING TO HAPPEN)
-const item = await db.query('SELECT stock FROM items WHERE id = ?', itemId);
-if (item.stock > 0) {
-    await db.query('UPDATE items SET stock = stock - 1 WHERE id = ?', itemId);
-    createOrder();
-}
-```
-Between the `SELECT` and the `UPDATE`, 40 threads read `stock = 1`. 
-Result: 41 people are billed. The inventory shows `-40`. You have to refund 40 angry customers and pay transaction processing fees out of your own pocket.
+## 1. Assumptions (Asumsi)
+* **High Concurrency Surges:** Traffic during product launches or flash sales creates bursts of 500+ requests per second hitting the same inventory row.
+* **ACID Relational Storage:** PostgreSQL is the definitive source of truth for stock quantities (not memory variables or eventual consistency NoSQL).
+* **Inventory Hold Window:** Shoppers expect stock to be reserved for a limited time (e.g., 15 minutes) while completing payment details.
 
 ---
 
-## 2. Architectural Blueprint: Atomic Reservation with TTL Expire
+## 2. Prerequisites (Prasyarat)
+* **PostgreSQL 14+:** Capable of executing single atomic SQL updates with `RETURNING` clauses and `CHECK` constraints.
+* **Background Scheduler / Worker:** A cron runner or job queue (pg_cron, Redis BullMQ, or Celery) capable of running minutely sweeps.
 
-```mermaid
-stateDiagram-v2
-    [*] --> Available: Stock Initialized (e.g. 10 units)
-    
-    Available --> Reserved: Customer Enters Checkout (Atomic Lock + 15 min TTL)
-    note right of Reserved
-        Stock is temporarily held.
-        Other users see 'Low Stock / In Cart'.
-    end note
-    
-    Reserved --> Available: Checkout Abandoned / TTL Expired (15 min)
-    Reserved --> Sold: Payment Confirmed (Marked permanently decremented)
-    
-    Sold --> [*]
-```
+---
+
+## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
+* **The Failure Story:** During a limited-edition merchandise drop of 50 items, 1,000 users initiate checkout simultaneously. The engineering team implemented standard application-level stock checks: `if (stock > 0) { await updateStock(); createOrder(); }`. Between the read and update steps, 40 parallel web requests see `stock = 1`.
+* **Financial Impact:** 40 customers billed for products that do not exist. Direct payment processing refund fees incurred ($0.30 + 2.9% per refund) plus reputational damage.
+* **Blast Radius:** Inventory tables corrupted with negative numbers (`available = -39`), customer service ticket queues overwhelmed.
+
+---
+
+## 4. Architectural Blueprint & DDL (Spesifikasi Arsitektur)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor UserA as Customer A (0.001s)
-    actor UserB as Customer B (0.002s)
+    actor UserA as Shopper A (0.001s)
+    actor UserB as Shopper B (0.002s)
     participant API as Checkout Service
-    participant DB as PostgreSQL Database
+    participant DB as PostgreSQL Core DB
 
-    UserA->>API: Click "Place Order" (Product #42)
-    UserB->>API: Click "Place Order" (Product #42)
+    UserA->>API: POST /checkout/reserve (Product #42, Qty: 1)
+    UserB->>API: POST /checkout/reserve (Product #42, Qty: 1)
 
-    Note over API,DB: Atomic Single-Query Decrement with Negative Guard
-    API->>DB: UPDATE inventory SET available = available - 1, reserved = reserved + 1 WHERE product_id = 42 AND available >= 1 RETURNING id;
-    DB-->>API: 1 Row Affected (Lock Acquired for User A)
-    API-->>UserA: 200 OK: "Order Reserved. Complete payment in 15 mins."
+    Note over API,DB: Atomic Single-Query Decrement with Non-Negative Guard
+    API->>DB: UPDATE product_inventory SET available_qty = available_qty - 1, reserved_qty = reserved_qty + 1 WHERE product_id = 42 AND available_qty >= 1 RETURNING product_id;
+    DB-->>API: 1 Row Affected (Lock Acquired for Shopper A)
+    API-->>UserA: 200 OK: "Item Reserved. Complete checkout within 15 minutes."
 
-    API->>DB: UPDATE inventory SET available = available - 1, reserved = reserved + 1 WHERE product_id = 42 AND available >= 1 RETURNING id;
-    DB-->>API: 0 Rows Affected (Condition failed: available is 0)
-    API-->>UserB: 409 Conflict: "Sorry, this item was just claimed by another shopper."
+    API->>DB: UPDATE product_inventory SET available_qty = available_qty - 1, reserved_qty = reserved_qty + 1 WHERE product_id = 42 AND available_qty >= 1 RETURNING product_id;
+    DB-->>API: 0 Rows Affected (Condition available_qty >= 1 evaluated to FALSE)
+    API-->>UserB: 409 Conflict: "Item just sold out. Added to waitlist."
 ```
 
----
-
-## 3. Database Specification: The Zero-Race Condition SQL
-
-Never check stock in application memory. Enforce it at the database engine level via constraints and single atomic updates:
-
 ```sql
--- 1. Hard constraint preventing stock from ever dipping below zero
+-- Production DDL: Zero-Race Condition Schema
 CREATE TABLE product_inventory (
-    product_id UUID PRIMARY KEY REFERENCES products(id),
+    product_id UUID PRIMARY KEY REFERENCES products(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
     available_qty INT NOT NULL DEFAULT 0,
     reserved_qty INT NOT NULL DEFAULT 0,
     sold_qty INT NOT NULL DEFAULT 0,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
+    -- HARD DATABASE GUARDS: Quantities can NEVER dip below zero under any condition
     CONSTRAINT chk_positive_available CHECK (available_qty >= 0),
-    CONSTRAINT chk_positive_reserved CHECK (reserved_qty >= 0)
+    CONSTRAINT chk_positive_reserved CHECK (reserved_qty >= 0),
+    CONSTRAINT chk_positive_sold CHECK (sold_qty >= 0)
 );
 
--- 2. Atomic Reservation Query (Application runs this single query)
--- Returns 0 rows if available_qty was already 0. Zero race conditions.
-UPDATE product_inventory
-SET 
-    available_qty = available_qty - 1,
-    reserved_qty = reserved_qty + 1,
-    updated_at = NOW()
-WHERE 
-    product_id = '018f3a21-7b3b-7412-bf91-a123456789ab'
-    AND available_qty >= 1
-RETURNING product_id, available_qty, reserved_qty;
-```
-
----
-
-## 4. TTL Reservation Worker (Releasing Abandoned Carts)
-
-If a user reserves stock but closes their browser, that inventory must not remain locked forever:
-
-```sql
 CREATE TABLE inventory_holds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
     product_id UUID NOT NULL REFERENCES product_inventory(product_id),
     session_id VARCHAR(100) NOT NULL,
     qty INT NOT NULL DEFAULT 1,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', -- 'ACTIVE', 'CONVERTED', 'EXPIRED'
-    expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '15 minutes')
+    expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '15 minutes'),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Cron worker running every minute to release expired reservations:
--- BEGIN TRANSACTION;
--- UPDATE product_inventory pi
--- SET available_qty = pi.available_qty + ih.qty, reserved_qty = pi.reserved_qty - ih.qty
--- FROM inventory_holds ih
--- WHERE ih.product_id = pi.product_id AND ih.status = 'ACTIVE' AND ih.expires_at < NOW();
--- UPDATE inventory_holds SET status = 'EXPIRED' WHERE status = 'ACTIVE' AND expires_at < NOW();
--- COMMIT;
+CREATE INDEX idx_inventory_holds_active ON inventory_holds(status, expires_at) WHERE status = 'ACTIVE';
 ```
+
+---
+
+## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
+* **Automated TTL Expire Worker:** A lightweight background worker runs every 60 seconds:
+  ```sql
+  BEGIN;
+  -- Release reserved quantities back to available stock
+  UPDATE product_inventory pi
+  SET available_qty = pi.available_qty + ih.qty,
+      reserved_qty = pi.reserved_qty - ih.qty,
+      updated_at = NOW()
+  FROM inventory_holds ih
+  WHERE ih.product_id = pi.product_id 
+    AND ih.status = 'ACTIVE' 
+    AND ih.expires_at < NOW();
+
+  -- Mark holds as expired
+  UPDATE inventory_holds 
+  SET status = 'EXPIRED' 
+  WHERE status = 'ACTIVE' AND expires_at < NOW();
+  COMMIT;
+  ```
+* **Ghost Stock Over-Correction:** If physical count discrepancies occur, adjustments are logged via `inventory_adjustments` table with required supervisor reasoning.
+
+---
+
+## 6. Security Boundary & Access Scope (Batas Keamanan)
+* **No Direct Write from Client:** Inventory quantities can only be modified through stored procedures or server-side atomic reservation queries. Direct client API updates (`PUT /api/inventory/:id`) are strictly blocked.
+* **Tenant Isolation:** All inventory checks are filtered by `tenant_id` ensuring a tenant's flash sale never locks another tenant's catalog.
+
+---
+
+## 7. Test Scenarios (Skenario Pengujian)
+
+```gherkin
+Feature: Inventory Concurrency & Stock Locking
+
+  Scenario: Standard Stock Reservation
+    Given product "SKU-99" has "available_qty = 10" and "reserved_qty = 0"
+    When customer "User-1" reserves 2 units
+    Then "available_qty" becomes 8 and "reserved_qty" becomes 2
+    And an active hold is created with a 15-minute expiration
+
+  Scenario: Concurrent Flash Sale Race Condition
+    Given product "SKU-99" has "available_qty = 1"
+    When 50 shoppers simultaneously submit a reservation request for 1 unit within 10ms
+    Then exactly 1 request returns HTTP 200 OK with reserved hold
+    And exactly 49 requests return HTTP 409 Conflict (Out of Stock)
+    And "available_qty" equals 0
+    And "available_qty" never reaches a negative value under any condition
+
+  Scenario: Abandoned Cart Stock Release
+    Given product "SKU-99" has an active hold of 1 unit that expired 1 minute ago
+    When the expiration sweep worker executes
+    Then the hold status updates to "EXPIRED"
+    And "available_qty" is restored by 1 unit
+```
+
+---
+
+## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
+* **Contraindications:** Do not implement for digital goods with infinite license inventory (e.g. downloadable PDFs, streaming video subscriptions).
+* **Performance Overhead:** Row-level locks in PostgreSQL introduce minor serialization delays during extreme flash sales (thousands of hits on the exact same row). For ultra-massive scale (>50k requests/second on a single SKU), introduce an in-memory Redis inventory counter as a pre-filtering admission gate.

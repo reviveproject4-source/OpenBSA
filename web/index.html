@@ -569,57 +569,118 @@ graph TD
         selectedModules.push(cb.value);
       });
 
-      let md = `# 📐 Functional & Edge-Case Specification: ${appName}\n`;
-      md += `> **Domain:** ${domain.toUpperCase()} | **Author:** ${author} | **Framework:** system-blueprint-os\n\n`;
-      md += `## 1. Executive Overview & Scope Boundaries\n`;
-      md += `This document defines the core business logic, database-level security policies, and edge-case handling rules for **${appName}**.\n\n`;
+      let md = `# 🏛️ Business-to-Engineering (B2E) Specification: ${appName}\n`;
+      md += `> **Domain:** ${domain.toUpperCase()} | **Lead Analyst:** ${author} | **Framework:** system-blueprint-os (B2E Spec Engine)\n\n`;
+      md += `## 1. Executive Scope & Contractual Boundaries\n`;
+      md += `This specification establishes deterministic engineering constraints, database integrity policies, and automated recovery strategies for **${appName}** based on the 7 Invariant Pillars.\n\n`;
       md += `### In-Scope vs Explicitly Out-of-Scope\n`;
-      md += `- **IN-SCOPE:** Core business workflow, atomic state transitions, automated audit trail, and zero-race-condition constraints.\n`;
-      md += `- **OUT-OF-SCOPE:** Unapproved third-party integrations, non-standard payment gateways, and features not covered in milestone deliverables.\n\n`;
+      md += `- **IN-SCOPE:** Core business state machines, atomic concurrency guards, immutable audit logging, and defensive recovery strategies.\n`;
+      md += `- **OUT-OF-SCOPE:** Unbudgeted third-party integrations and unverified features not governed by formal Change Request (CR) sign-offs.\n\n`;
       
-      md += `## 2. Mandatory Architectural Constraints\n`;
+      md += `## 2. Invariant Engineering Blueprints (The 7-Pillar Standard)\n\n`;
 
       if (selectedModules.includes('idempotency')) {
-        md += `### Blueprint 01: Payment Webhook Idempotency & Mutex\n`;
-        md += `- All payment webhook handlers MUST enforce unique idempotency keys: \`UNIQUE(tenant_id, gateway_name, gateway_event_id)\`.\n`;
-        md += `- Concurrent webhook retries must acquire a 60s Redis lock before modifying order status.\n\n`;
+        md += `### Blueprint 01: Payment Webhook Idempotency & Auto-Reconciliation\n`;
+        md += `- **Assumptions:** Gateway delivers webhooks at-least-once; network drops between server and gateway are inevitable.\n`;
+        md += `- **Prerequisites:** PostgreSQL 14+, Redis 6.2+ for distributed lock coordination.\n`;
+        md += `- **Failure Scenario:** Webhook retries create duplicate orders, ship multiple physical items, and desync ledger.\n`;
+        md += `- **Architecture & DDL:** \`UNIQUE(tenant_id, gateway_name, gateway_event_id)\` with 60s Redis \`SETNX\` lock.\n`;
+        md += `- **Recovery Strategy:** Nightly 02:00 UTC reconciliation cron queries gateway API for pending transactions > 2 hours.\n`;
+        md += `- **Security Boundary:** Discard with HTTP 401 before JSON parse if HMAC-SHA256 signature verification fails.\n`;
+        md += `- **Test Scenario (BDD):** 5 concurrent duplicate webhooks result in exactly 1 order and 4 HTTP 200 acknowledgments.\n`;
+        md += `- **Batasan Penerapan:** Do not use for zero-cost free trials where duplicates carry zero financial liability.\n\n`;
       }
 
       if (selectedModules.includes('concurrency')) {
         md += `### Blueprint 02: Inventory Concurrency & Race Conditions\n`;
-        md += `- Stock decrements MUST occur within an atomic SQL update statement: \`UPDATE inventory SET available = available - 1 WHERE id = ? AND available >= 1\`.\n`;
-        md += `- Application memory checks without row-level locks are strictly forbidden.\n\n`;
+        md += `- **Assumptions:** High concurrency bursts of 500+ checkouts/second hitting limited stock rows.\n`;
+        md += `- **Prerequisites:** PostgreSQL supporting atomic \`UPDATE ... WHERE available_qty >= 1 RETURNING\`.\n`;
+        md += `- **Failure Scenario:** 40 shoppers see \`stock = 1\` in application memory, creating negative stock and dispute fees.\n`;
+        md += `- **Architecture & DDL:** \`CONSTRAINT chk_positive_available CHECK (available_qty >= 0)\` and 15-min TTL hold table.\n`;
+        md += `- **Recovery Strategy:** Minutely sweep worker restores expired reserved quantities back to available stock.\n`;
+        md += `- **Security Boundary:** Server-side atomic reservation only; direct client stock quantity updates are blocked.\n`;
+        md += `- **Test Scenario (BDD):** 50 concurrent checkouts on 1 remaining item results in 1 success and 49 HTTP 409 Conflicts.\n`;
+        md += `- **Batasan Penerapan:** Not needed for digital goods with unlimited inventory (PDF downloads, licenses).\n\n`;
       }
 
       if (selectedModules.includes('rls')) {
         md += `### Blueprint 03: PostgreSQL Row-Level Security (RLS)\n`;
-        md += `- All tenant tables MUST have RLS enabled (\`FORCE ROW LEVEL SECURITY\`).\n`;
-        md += `- Connections inject \`app.current_tenant_id\` dynamically to prevent cross-tenant data leaks.\n\n`;
+        md += `- **Assumptions:** Shared-database multi-tenancy; developers will occasionally forget manual \`WHERE tenant_id = ?\`.\n`;
+        md += `- **Prerequisites:** PostgreSQL 12+ with \`FORCE ROW LEVEL SECURITY\` enabled.\n`;
+        md += `- **Failure Scenario:** Export feature leaks Company B's confidential pricing to Company A, violating GDPR.\n`;
+        md += `- **Architecture & DDL:** \`CREATE POLICY tenant_isolation_policy ON customer_invoices FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::UUID)\`.\n`;
+        md += `- **Recovery Strategy:** Fails closed (returns 0 rows) if tenant context is missing or unverified.\n`;
+        md += `- **Security Boundary:** Tenant claim extracted strictly from cryptographically signed JWT session.\n`;
+        md += `- **Test Scenario (BDD):** Querying another company's invoice ID returns HTTP 404 with 0 bytes leaked.\n`;
+        md += `- **Batasan Penerapan:** Do not use for enterprise contracts requiring physically dedicated isolated servers.\n\n`;
       }
 
       if (selectedModules.includes('audit')) {
-        md += `### Blueprint 04: Immutable Audit Trail\n`;
-        md += `- High-risk operations (voids, overrides, discounts > 10%) must append to an immutable WORM ledger.\n`;
-        md += `- SQL triggers must block ANY \`UPDATE\` or \`DELETE\` statements on the audit ledger table.\n\n`;
+        md += `### Blueprint 04: Immutable Audit Trail & Anti-Fraud Log\n`;
+        md += `- **Assumptions:** Insider threats from staff with legitimate credentials; legal non-repudiation requirement.\n`;
+        md += `- **Prerequisites:** PostgreSQL PL/pgSQL triggers and SHA-256 hash chaining.\n`;
+        md += `- **Failure Scenario:** Cashier voids a $200 cash sale after customer leaves, pocketing cash with zero audit record.\n`;
+        md += `- **Architecture & DDL:** \`system_audit_ledger\` table with trigger strictly raising exception on \`UPDATE\` or \`DELETE\`.\n`;
+        md += `- **Recovery Strategy:** Nightly hash-chain validator detects retroactive database file tampering.\n`;
+        md += `- **Security Boundary:** Stores actor UUIDs and entity IDs; never stores plaintext customer passwords or credit cards.\n`;
+        md += `- **Test Scenario (BDD):** Attempted manual SQL update on audit table aborts with "CRITICAL SECURITY VIOLATION".\n`;
+        md += `- **Batasan Penerapan:** Do not log routine low-risk page views (store in Datadog/Elasticsearch instead).\n\n`;
+      }
+
+      if (selectedModules.includes('scopepact')) {
+        md += `### Blueprint 05: The Anti-Scope Creep Pact & Definition of Done\n`;
+        md += `- **Assumptions:** Unmanaged client briefs result in 45% unbudgeted scope creep; definition of done is ambiguous.\n`;
+        md += `- **Prerequisites:** Signed In-Scope vs Out-of-Scope boundary contract prior to sprint kickoff.\n`;
+        md += `- **Failure Scenario:** Client demands unbudgeted Bluetooth sync, withholds $10,000 final milestone payment.\n`;
+        md += `- **Architecture & Protocol:** Formal 3-Option Change Request (Fund, Defer, or Scope Swap) with 4-Tier DoD.\n`;
+        md += `- **Recovery Strategy:** Sprint development continues uninterrupted while out-of-scope requests enter CR pipeline.\n`;
+        md += `- **Security Boundary:** Verification gates require dual sign-off from Lead Analyst and Lead Engineer.\n`;
+        md += `- **Test Scenario (BDD):** Out-of-scope feature request triggers formal cost/time impact analysis form.\n`;
+        md += `- **Batasan Penerapan:** Not needed for 48-hour exploratory hackathons or disposable R&D spikes.\n\n`;
       }
 
       if (selectedModules.includes('rounding')) {
         md += `### Blueprint 07: Decimal & Multi-Currency Integrity\n`;
-        md += `- All currency values MUST be stored as integers representing atomic units (cents).\n`;
-        md += `- Floating point math in financial calculations is strictly forbidden. Use Banker's Rounding.\n\n`;
+        md += `- **Assumptions:** IEEE 754 floating-point math cannot represent base-10 fractions; tax audits require Banker's Rounding.\n`;
+        md += `- **Prerequisites:** Integer-based database schemas (cents/satuan) and arbitrary-precision libraries.\n`;
+        md += `- **Failure Scenario:** Float rounding drift causes $1,800 discrepancy in books, resulting in tax audit penalties.\n`;
+        md += `- **Architecture & DDL:** \`BIGINT\` storage with constraint \`chk_ledger_math_integrity CHECK (total = subtotal + tax - discount)\`.\n`;
+        md += `- **Recovery Strategy:** Monthly cent-drift reconciler flags discrepancies > $0.05 before tax submission.\n`;
+        md += `- **Security Boundary:** Calculation occurs strictly backend; client sends item IDs and quantities only.\n`;
+        md += `- **Test Scenario (BDD):** $19.99 with 8.25% tax rounds to exactly 165 cents ($1.65) using Banker's Rounding.\n`;
+        md += `- **Batasan Penerapan:** Adjust precision dictionary for zero-decimal currencies (JPY, IDR, KRW).\n\n`;
       }
 
       if (selectedModules.includes('circuit')) {
         md += `### Blueprint 12: Third-Party Outage Circuit Breaker\n`;
-        md += `- External notification (WhatsApp/Email) and AI calls must NEVER block synchronous checkout threads.\n`;
-        md += `- Dispatch to background queues with exponential backoff and circuit breaker failover.\n\n`;
+        md += `- **Assumptions:** External cloud APIs (WhatsApp, OpenAI, Stripe) will experience unexpected downtime.\n`;
+        md += `- **Prerequisites:** Asynchronous background job queues (BullMQ/SQS) and circuit breaker state tracking.\n`;
+        md += `- **Failure Scenario:** SendGrid API hangs for 60s, starving web server connections and causing site-wide 504 errors.\n`;
+        md += `- **Architecture & State:** State machine (CLOSED -> OPEN -> HALF-OPEN) with 3,000ms hard socket timeout.\n`;
+        md += `- **Recovery Strategy:** Short-circuits in 0ms during outages; retries with exponential backoff and jitter.\n`;
+        md += `- **Security Boundary:** Third-party credentials stored in encrypted vaults, never in frontend bundles.\n`;
+        md += `- **Test Scenario (BDD):** Checkout completes in < 200ms even when external notification vendor is down.\n`;
+        md += `- **Batasan Penerapan:** Do not use on synchronous core payment capture endpoints.\n\n`;
       }
 
-      md += `## 3. Definition of Done (DoD)\n`;
-      md += `A feature is only considered complete when:\n`;
-      md += `1. BDD Acceptance Criteria pass.\n`;
-      md += `2. Database migrations are zero-downtime compatible (\`CONCURRENTLY\` index creation, non-locking constraints).\n`;
-      md += `3. Edge cases documented above have matching automated test cases.\n`;
+      if (selectedModules.includes('shield')) {
+        md += `### Blueprint 13: Toll Fraud Shield & SMS Kill Switch\n`;
+        md += `- **Assumptions:** Botnets systematically attack public auth forms to trigger SMS to premium foreign telco ranges.\n`;
+        md += `- **Prerequisites:** Cloudflare Turnstile bot verification and Google libphonenumber parsing.\n`;
+        md += `- **Failure Scenario:** Bot triggers 45,000 SMS requests overnight, causing an unexpected $6,500 Twilio bill.\n`;
+        md += `- **Architecture & DDL:** Multi-layer defense (Turnstile -> Whitelist Geofence -> Velocity Limits -> $50 Kill-Switch).\n`;
+        md += `- **Recovery Strategy:** Automated circuit breaker flips to Email Verification Only if daily spend exceeds $50.\n`;
+        md += `- **Security Boundary:** Discard requests to non-whitelisted international prefixes before calling telco API.\n`;
+        md += `- **Test Scenario (BDD):** Form submission without Turnstile token rejected immediately with HTTP 403.\n`;
+        md += `- **Batasan Penerapan:** Do not mandate CAPTCHA inside authenticated mobile apps with active biometrics.\n\n`;
+      }
+
+      md += `## 3. The 4-Tier Definition of Done (DoD)\n`;
+      md += `A milestone feature is only approved for final payout when:\n`;
+      md += `1. **Tier 1 (Functional):** All BDD Given-When-Then acceptance criteria pass.\n`;
+      md += `2. **Tier 2 (Edge-Case):** Concurrency guards and recovery strategies verified.\n`;
+      md += `3. **Tier 3 (Security):** RLS tenant isolation and least-privilege policies verified.\n`;
+      md += `4. **Tier 4 (Operational):** Phased zero-downtime database migrations executed without table locks.\n`;
 
       document.getElementById('spec-output').value = md;
     }

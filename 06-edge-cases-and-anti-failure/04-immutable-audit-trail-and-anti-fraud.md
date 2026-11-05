@@ -1,20 +1,30 @@
 # Blueprint 04: Immutable Audit Trail & Anti-Fraud Log
 
-> **Target Problem:** A store cashier voids a $200 cash sale after the customer walks out, pocketing the $200 cash and adjusting inventory to "damaged goods". A disgruntled employee deletes order records before quitting. Without an immutable append-only audit trail, the business owner loses money without any legal proof of theft.
+> **Target Problem:** A store cashier voids a $200 cash sale after the customer walks out, pocketing the cash and writing off the inventory as "damaged stock". An employee deletes order records before resigning. Without an immutable append-only audit trail, the business owner loses money without forensic evidence of theft.
 
 ---
 
-## 1. The Nightmare Scenario
-A retail multi-outlet business owner notices a $4,500 cash shortage at the end of the month. 
-When they check the database, several cash sales from the past 3 weeks are simply missing or modified to $0. 
-The database administrator says: *"Someone ran an `UPDATE` or `DELETE` query with manager credentials. We have no record of who did it, what the original price was, or what IP address it came from."*
-The police cannot take action because there is zero forensic chain of custody.
+## 1. Assumptions (Asumsi)
+* **Insider Threat Reality:** Fraud and theft frequently originate from trusted internal employees with legitimate system access (cashiers, supervisors, admins).
+* **Non-Repudiation Requirement:** Actions involving money, discounts, debt cancellations, or record deletions must be permanently provable in a legal dispute.
+* **Database WORM (Write-Once-Read-Many):** Audit entries must be permanent; even database administrators cannot edit or delete audit rows without triggering cryptographic alarms.
 
 ---
 
-## 2. Architectural Blueprint: Append-Only Immutable Ledger (WORM)
+## 2. Prerequisites (Prasyarat)
+* **PostgreSQL 12+:** Supporting PL/pgSQL triggers that can intercept and abort `UPDATE` and `DELETE` commands.
+* **Cryptographic Hashing:** `pgcrypto` extension or SHA-256 hash chaining to detect retroactive table tampering.
 
-In financial and inventory systems, **records are never deleted or mutated in-place**. Every change is recorded as an immutable new event with cryptographic checksum verification.
+---
+
+## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
+* **The Failure Story:** An operator of a 5-branch retail chain discovers an unexplained $6,000 cash shortage at month-end. When reviewing the database, multiple sales records from the prior 3 weeks are completely missing or modified to $0. The database admin reports: *"Someone with manager credentials ran an UPDATE/DELETE query. We have no record of who logged in, what the original price was, or what terminal was used."*
+* **Financial Impact:** Unrecoverable monetary loss ($6,000) and inability to file an insurance claim or police report due to lack of admissible forensic logs.
+* **Blast Radius:** Financial accounts, inventory shrinkage calculations, and loss of trust across the entire workforce.
+
+---
+
+## 4. Architectural Blueprint & DDL (Spesifikasi Arsitektur)
 
 ```mermaid
 graph LR
@@ -23,24 +33,20 @@ graph LR
     classDef ledger fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef blocked fill:#ffebee,stroke:#c62828,stroke-width:2px;
 
-    User[Cashier / Operator]:::client -->|Initiates Void / Discount / Refund| Action[Business Event Trigger]:::action
-    Action --> Write[Write Immutable Audit Entry]:::ledger
-    
+    User[Operator / Cashier]:::client -->|Initiates Void / Discount > 10%| Event[Business Action]:::action
+    Event --> Write[Append Immutable Audit Entry]:::ledger
+
     subgraph Database Kernel Triggers
-        Write --> Hash[Compute SHA-256 Checksum<br/><i>Hash(PrevHash + RecordData)</i>]:::ledger
-        Hash --> Ledger[(audit_trail Table)]:::ledger
-        
-        Ledger -.->|Attempt UPDATE or DELETE| Guard{SQL Trigger / Rule}:::blocked
-        Guard -->|BLOCKED| Error[RAISE EXCEPTION:<br/>'Audit trail is immutable!']:::blocked
+        Write --> Hash[Compute Record Hash:<br/><code>SHA256(PrevHash + Data + Actor + Time)</code>]:::ledger
+        Hash --> Ledger[(system_audit_ledger Table)]:::ledger
+
+        Ledger -.->|Attempt UPDATE or DELETE| Guard{SQL Trigger Intercept}:::blocked
+        Guard -->|EXECUTION BLOCKED| Error[RAISE EXCEPTION:<br/>'CRITICAL: Audit logs are immutable!']:::blocked
     end
 ```
 
----
-
-## 3. Database Specification: The Cryptographically Sealed Ledger
-
 ```sql
--- 1. Create the immutable audit log table
+-- Production DDL: Append-Only Immutable Audit Ledger
 CREATE TABLE system_audit_ledger (
     id BIGSERIAL PRIMARY KEY,
     tenant_id UUID NOT NULL REFERENCES tenants(id),
@@ -58,11 +64,11 @@ CREATE TABLE system_audit_ledger (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. HARD SECURITY RULE: Prevent ANY UPDATE or DELETE on this table
+-- CRITICAL SECURITY RULE: Trigger that strictly blocks ANY UPDATE or DELETE
 CREATE OR REPLACE FUNCTION prevent_audit_tampering()
 RETURNS TRIGGER AS $$
 BEGIN
-    RAISE EXCEPTION 'CRITICAL SECURITY ALERT: Records in system_audit_ledger are immutable and cannot be updated or deleted!';
+    RAISE EXCEPTION 'CRITICAL SECURITY VIOLATION: Records in system_audit_ledger are immutable and cannot be updated or deleted!';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -74,13 +80,46 @@ CREATE TRIGGER trg_immutable_audit
 
 ---
 
-## 4. Business Rules: High-Risk Action Guardrails
+## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
+* **Cryptographic Chain Verification (Nightly Integrity Check):** A nightly worker reads the entire ledger and recalculates the SHA-256 hash chain:
+  `Hash_N = SHA256(Hash_{N-1} || RecordData)`. If any historical row was altered via low-level database file tampering, an immediate security alert (`AUDIT_CHAIN_BROKEN_AT_RECORD_ID`) is fired.
+* **Secondary WORM Archival:** Audit logs older than 90 days are mirrored asynchronously to an append-only S3 bucket with Object Lock (Compliance Mode) enabled.
 
-1. **Mandatory Reason Field:**
-   Any void, manual discount > 10%, or price override must prompt a mandatory input modal. The system rejects the API call if `reason.length < 15 characters`.
-2. **Four-Eyes Trigger:**
-   If a void exceeds $100, the POS application must lock until a Manager swipes their RFID card or enters a 2FA OTP pin.
-3. **Automated Flagging Report:**
-   A weekly automated email is dispatched to the Business Owner highlighting:
-   * Top 3 employees with the highest ratio of voided transactions.
-   * Any transactions modified outside normal store operating hours (e.g. 11:30 PM).
+---
+
+## 6. Security Boundary & Access Scope (Batas Keamanan)
+* **No PII Storage in Audit Logs:** To avoid conflict with GDPR/privacy laws (BP-08), audit logs store `actor_id UUID` and entity IDs, but NEVER store plain-text customer credit cards, phone numbers, or passwords.
+* **Mandatory Justification Gate:** The application rejects any high-risk action (voids, discounts > 10%) at the API validation layer if the `reason` field is shorter than 15 characters.
+
+---
+
+## 7. Test Scenarios (Skenario Pengujian)
+
+```gherkin
+Feature: Immutable Audit Trail & Anti-Fraud
+
+  Scenario: Operator Applies a Large Discount
+    Given a cashier applies a 20% manual discount to Order "ORD-404"
+    When the transaction commits
+    Then a record is inserted into "system_audit_ledger" with "DISCOUNT_APPLIED"
+    And the old price and discounted price are captured in JSONB
+    And the record hash matches SHA256 calculation
+
+  Scenario: Malicious Update Attempt on Historical Audit Row
+    Given an existing record exists in "system_audit_ledger" with ID 105
+    When a database user attempts to run "UPDATE system_audit_ledger SET new_state = '{}' WHERE id = 105"
+    Then PostgreSQL aborts the transaction with exception "CRITICAL SECURITY VIOLATION"
+    And the record remains completely unchanged
+
+  Scenario: Attempted Deletion of Audit Trail
+    Given an existing record exists in "system_audit_ledger" with ID 105
+    When an admin user attempts to execute "DELETE FROM system_audit_ledger WHERE id = 105"
+    Then PostgreSQL aborts the transaction with exception "CRITICAL SECURITY VIOLATION"
+    And zero rows are deleted
+```
+
+---
+
+## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
+* **Contraindications:** Do not log routine low-risk read operations (e.g. `VIEW_PRODUCT_PAGE`, `SEARCH_QUERY`) into this table. That belongs in high-volume logging systems (Datadog/Elasticsearch). This ledger is strictly reserved for financial, security, and administrative state changes.
+* **Storage Footprint:** At 50,000 transactions/month, audit tables generate ~250MB/year. Implement automated partitioning by month (`PARTITION BY RANGE (created_at)`) for high-volume enterprises.

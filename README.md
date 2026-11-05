@@ -1,21 +1,40 @@
 # ⚡ system-blueprint-os
-> **The Open Enterprise Specification & Anti-Failure Engine.**  
+> **The Open Business-to-Engineering (B2E) Specification Framework.**  
 > *Bridging Founder Vision with Engineering Execution — Anticipating the Critical Edge Cases Before You Write Code or Sign a Dev Contract.*
 
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Framework: B2E Spec](https://img.shields.io/badge/Methodology-B2E%20Specification%20Framework-blueviolet?style=for-the-badge)](./FRAMEWORK.md)
 [![Deploy with Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
 [![Target: Founders & Devs](https://img.shields.io/badge/Built%20For-Founders%20%7C%20SMBs%20%7C%20Developers-orange?style=for-the-badge)](#-who-this-is-built-for)
 [![14 Anti-Failure Blueprints](https://img.shields.io/badge/Anti--Failure-14%20Edge%20Case%20Blueprints-red?style=for-the-badge)](./06-edge-cases-and-anti-failure/)
 [![Mermaid Powered](https://img.shields.io/badge/Diagrams-Mermaid.js-ff69b4?style=for-the-badge)](https://mermaid.js.org/)
 [![Author: Tri Raida](https://img.shields.io/badge/Author-Tri%20Raida-success?style=for-the-badge)](https://github.com/reviveproject4-source)
 
-**Production-grade architectural specifications, visual process models, and battle-tested failure-mode blueprints designed by an operator-turned-systems-analyst.**
+**A rigorous architectural framework, visual process models, and battle-tested failure-mode blueprints designed by an operator-turned-systems-analyst.**
 
-[Explore 14 Anti-Failure Blueprints](./06-edge-cases-and-anti-failure/) • [Launch Web App (Vercel Ready)](./web/) • [Consulting & Advisory](./SERVICES.md) • [Contributing](./CONTRIBUTING.md)
+[Read the B2E Framework Guide](./FRAMEWORK.md) • [Explore 14 Blueprints](./06-edge-cases-and-anti-failure/) • [Launch Web Studio](./web/) • [Consulting & Advisory](./SERVICES.md)
 
 </div>
+
+---
+
+## 🏛️ Not Just Documents: A Formal B2E Specification Framework
+
+`system-blueprint-os` is not a loose collection of 14 markdown files. It is an operational **Business-to-Engineering (B2E) Specification Framework** designed to bridge the chasm between commercial business operators and software engineering teams.
+
+Every single blueprint in this repository strictly adheres to the **7 Invariant Engineering Pillars**:
+1. **Assumptions (Asumsi):** Environmental, infrastructure, and volume baselines.
+2. **Prerequisites (Prasyarat):** Technical tooling, libraries, and organizational prerequisites.
+3. **Failure Scenario & Blast Radius:** The detailed catastrophe, monetary loss, and systems affected.
+4. **Architectural Specification & DDL:** Executable PostgreSQL schemas, constraints, and Mermaid flows.
+5. **Recovery Strategy & Self-Healing:** Automated reconcilers, DLQ workers, and manual rollback runbooks.
+6. **Security Boundary & Access Scope:** Least privilege, RLS policies, and immutable audit boundaries.
+7. **Test Scenarios (BDD):** Given-When-Then positive, negative, and concurrency stress vectors.
+8. **Batasan Penerapan (Trade-offs):** Concrete contraindications defining when **NOT** to use the blueprint.
+
+👉 **[Read the complete Framework Governance & Methodology in FRAMEWORK.md](./FRAMEWORK.md)**
 
 ---
 

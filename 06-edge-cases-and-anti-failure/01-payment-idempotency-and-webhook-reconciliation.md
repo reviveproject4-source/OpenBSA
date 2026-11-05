@@ -1,61 +1,72 @@
 # Blueprint 01: Payment Webhook Idempotency & Auto-Reconciliation
 
-> **Target Problem:** A customer's bank card is charged $150, but an unstable network drops your server connection before the order is marked `PAID`. The customer complains of a stolen charge, or the payment gateway retries the webhook 5 times, creating 5 duplicate orders and shipping 5 items.
+> **Target Problem:** A customer's credit card is charged $150, but an unstable network drops your server connection before the order is marked `PAID`. The payment gateway retries the webhook 5 times, creating 5 duplicate orders, deducting inventory 5 times, and shipping 5 items for the price of 1.
 
 ---
 
-## 1. The Nightmare Scenario
-On Black Friday, Payment Gateway X issues a webhook for Order #8921. Your server is under high CPU load and takes 5.2 seconds to respond. The gateway assumes a timeout and retries the webhook 4 times over the next 15 minutes. 
-Because your developer wrote a naive `INSERT INTO orders ...` endpoint without an idempotency key or a state check:
-1. The customer is billed once, but 4 duplicate order records are created.
-2. Warehouse inventory is decremented 4 times.
-3. 4 automated fulfillment labels are printed, shipping 4 units of product for the price of 1.
+## 1. Assumptions (Asumsi)
+* **At-Least-Once Delivery:** The payment gateway (Stripe, Midtrans, Xendit, PayPal) guarantees *at-least-once* webhook delivery, which makes duplicate HTTP requests inevitable by design.
+* **Network Asynchrony:** Network latency or temporary server spikes will occasionally cause webhooks to exceed the gateway's 3-second timeout threshold.
+* **Stateless API Gateway:** Webhook worker nodes are horizontally scalable and stateless; state coordination must rely on a shared distributed cache (Redis) and relational database (PostgreSQL).
 
 ---
 
-## 2. Architectural Blueprint: Idempotency Key & Mutex
+## 2. Prerequisites (Prasyarat)
+* **PostgreSQL 14+:** Supporting row-level locking (`SELECT ... FOR UPDATE`) and unique compound constraints.
+* **Redis 6.2+:** Configured for atomic distributed locking using `SET ... NX EX`.
+* **Cryptographic Signature Verification:** Gateway webhook signing secrets (`STRIPE_WEBHOOK_SECRET`) configured in environment variables and never checked into source control.
+
+---
+
+## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
+* **The Failure Story:** During a promotional surge, Payment Gateway X issues a webhook for Order #8921. The API server takes 5.2 seconds to process the request due to heavy load. The gateway flags a timeout and retries the webhook 4 times over the next 15 minutes. Because the endpoint uses naive `INSERT INTO orders` code without an idempotency key or distributed mutex, 4 duplicate paid orders are created.
+* **Financial Impact:** 3 extra physical units shipped for free ($450 loss) plus warehouse fulfillment labor costs.
+* **Blast Radius:** Downstream inventory counts, financial revenue reports, fulfillment label printers, and automated customer receipt emails.
+
+---
+
+## 4. Architectural Blueprint & DDL (Spesifikasi Arsitektur)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Gateway as Payment Gateway (Stripe/Xendit/Midtrans)
-    participant Webhook as API Webhook Receiver
-    participant Cache as Redis (Lock & Key Cache)
-    participant DB as Core PostgreSQL Database
+    participant Gateway as Payment Gateway (Stripe/Xendit)
+    participant Receiver as Webhook Receiver API
+    participant Cache as Redis (Distributed Lock)
+    participant DB as PostgreSQL Core Database
     participant Worker as Fulfillment / Email Worker
 
-    Gateway->>Webhook: POST /webhooks/payment (Payload + EventID: evt_99482)
-    Webhook->>Cache: SETNX idempotency:evt_99482 "PROCESSING" EX 60s
-    alt Key already exists (Concurrent retry or in-flight)
-        Cache-->>Webhook: FALSE (Lock failed)
-        Webhook-->>Gateway: HTTP 200 OK (Acknowledge receipt to stop spam retries)
-    else Key acquired successfully
-        Cache-->>Webhook: TRUE (Lock acquired)
-        Webhook->>DB: BEGIN TRANSACTION;
-        Webhook->>DB: SELECT status FROM orders WHERE payment_ref = 'evt_99482' FOR UPDATE;
-        alt Order is already marked 'PAID'
-            DB-->>Webhook: Status is 'PAID'
-            Webhook->>DB: ROLLBACK;
-            Webhook->>Cache: SET idempotency:evt_99482 "COMPLETED" EX 86400s
-            Webhook-->>Gateway: HTTP 200 OK
+    Gateway->>Receiver: POST /webhooks/payment (Payload + EventID: evt_99482 + Signature)
+    Receiver->>Receiver: Verify HMAC-SHA256 Signature Header
+    
+    Receiver->>Cache: SETNX idempotency:evt_99482 "PROCESSING" EX 60s
+    alt Lock Acquisition Failed (Duplicate / In-Flight Request)
+        Cache-->>Receiver: FALSE (Lock already held)
+        Receiver-->>Gateway: HTTP 200 OK (Acknowledge immediately to halt retry loop)
+    else Lock Acquired Successfully
+        Cache-->>Receiver: TRUE (Proceed)
+        Receiver->>DB: BEGIN TRANSACTION;
+        Receiver->>DB: SELECT status FROM orders WHERE id = :order_id FOR UPDATE;
+        
+        alt Order is Already Marked 'PAID'
+            DB-->>Receiver: Order Status is 'PAID'
+            Receiver->>DB: ROLLBACK;
+            Receiver->>Cache: SET idempotency:evt_99482 "COMPLETED" EX 86400s
+            Receiver-->>Gateway: HTTP 200 OK
         else Order is 'PENDING'
-            Webhook->>DB: UPDATE orders SET status = 'PAID', paid_at = NOW() WHERE id = ...;
-            Webhook->>DB: UPDATE inventory SET reserved = reserved - 1, sold = sold + 1 WHERE ...;
-            Webhook->>DB: INSERT INTO payment_audit_logs (event_id, amount, raw_payload) VALUES (...);
-            Webhook->>DB: COMMIT;
-            Webhook->>Cache: SET idempotency:evt_99482 "COMPLETED" EX 86400s
-            Webhook->>Worker: Enqueue(SendCustomerReceipt & TriggerFulfillment)
-            Webhook-->>Gateway: HTTP 200 OK
+            Receiver->>DB: UPDATE orders SET status = 'PAID', paid_at = NOW() WHERE id = :order_id;
+            Receiver->>DB: UPDATE product_inventory SET available_qty = available_qty - 1, reserved_qty = reserved_qty - 1 WHERE product_id = :prod_id;
+            Receiver->>DB: INSERT INTO payment_events (tenant_id, gateway_name, gateway_event_id, order_id, amount_cents) VALUES (...);
+            Receiver->>DB: COMMIT;
+            Receiver->>Cache: SET idempotency:evt_99482 "COMPLETED" EX 86400s
+            Receiver->>Worker: Enqueue(TriggerFulfillmentJob & SendReceipt)
+            Receiver-->>Gateway: HTTP 200 OK
         end
     end
 ```
 
----
-
-## 3. Database Specification & Constraints
-
 ```sql
--- 1. Enforce strict uniqueness on external payment references
+-- Production DDL: Enforce strict gateway event idempotency
 CREATE TABLE payment_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
@@ -66,10 +77,10 @@ CREATE TABLE payment_events (
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',
     status VARCHAR(50) NOT NULL, -- 'PROCESSED', 'IGNORED_DUPLICATE', 'FAILED'
     received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    payload_hash VARCHAR(64) NOT NULL, -- SHA-256 to detect forged payload tampering
+    payload_hash VARCHAR(64) NOT NULL, -- SHA-256 hash of raw payload to detect tampering
     raw_payload JSONB NOT NULL,
     
-    -- HARD CONSTRAINT: A gateway event ID can NEVER be recorded twice for the same tenant
+    -- HARD DATABASE CONSTRAINT: An event ID can NEVER be recorded twice for the same tenant
     CONSTRAINT uq_gateway_event UNIQUE (tenant_id, gateway_name, gateway_event_id)
 );
 
@@ -78,32 +89,51 @@ CREATE INDEX idx_payment_events_order ON payment_events(order_id);
 
 ---
 
-## 4. Business Rules & Acceptance Criteria (Gherkin BDD)
+## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
+* **Automated Reconciliation Cron:** A daily worker runs at 02:00 AM UTC. It queries all orders in `PENDING` state older than 2 hours and queries the gateway's REST API (`GET /v1/charges/{charge_id}`). If the gateway reports success, the cron marks the order `PAID` with note `AUTO_RECONCILED_BY_CRON`.
+* **Dead-Letter Queue (DLQ):** Webhooks with invalid signatures or database transaction timeouts are directed to a DLQ topic (`payments.webhook.dlq`) with exponential backoff (1m, 5m, 15m).
+* **Manual Runbook:** If an order remains orphaned, support staff can trigger `POST /admin/reconcile-order/:id`, which forces a direct API query to the payment gateway without manual SQL edits.
+
+---
+
+## 6. Security Boundary & Access Scope (Batas Keamanan)
+* **Cryptographic Verification First:** The payload is discarded with `HTTP 401 Unauthorized` before parsing JSON if the HMAC-SHA256 signature does not match the shared gateway secret.
+* **Least Privilege:** The webhook ingestion service database credentials have permission only to `SELECT/UPDATE` orders and `INSERT` to `payment_events`. It has zero permissions to delete tables or modify user credentials.
+* **Row-Level Security:** In multi-tenant environments, the gateway webhook handler extracts `tenant_id` from metadata and scopes all database mutations to that tenant context.
+
+---
+
+## 7. Test Scenarios (Skenario Pengujian)
 
 ```gherkin
-Scenario: Webhook arrives after network timeout retry
-  Given an order "ORD-1001" exists with status "PENDING"
-  When the payment gateway sends webhook event "evt_abc123" with status "SUCCESS"
-  Then the system records the payment and updates "ORD-1001" status to "PAID"
-  And the system returns HTTP 200 OK to the gateway
+Feature: Payment Webhook Idempotency & Reconciliation
 
-Scenario: Duplicate webhook arrives for an already processed payment
-  Given an order "ORD-1001" has already been marked "PAID" by event "evt_abc123"
-  When the payment gateway retries webhook event "evt_abc123"
-  Then the system detects the existing idempotency key
-  And does NOT deduct inventory again
-  And does NOT trigger a duplicate fulfillment email
-  And returns HTTP 200 OK immediately to stop gateway retries
+  Scenario: Standard Successful Payment
+    Given an order "ORD-100" exists with status "PENDING"
+    When the gateway sends webhook "evt_123" with valid signature and status "SUCCESS"
+    Then the system updates order "ORD-100" status to "PAID"
+    And records an event in "payment_events" with status "PROCESSED"
+    And responds with HTTP 200 OK within 300 milliseconds
+
+  Scenario: Duplicate Webhook Attack / Network Retry
+    Given an order "ORD-100" was already marked "PAID" by event "evt_123"
+    When the gateway resends webhook "evt_123" 10 seconds later
+    Then the system detects the existing idempotency key in Redis
+    And does NOT decrement product inventory again
+    And does NOT enqueue duplicate fulfillment jobs
+    And returns HTTP 200 OK immediately to stop retries
+
+  Scenario: Concurrency Spike (Thundering Herd)
+    Given an order "ORD-100" with status "PENDING"
+    When 5 identical webhook requests for "evt_123" hit the server within the same 5ms window
+    Then exactly 1 request acquires the distributed lock and updates the database
+    And 4 requests fail to acquire the lock and exit safely with HTTP 200 OK
+    And the final inventory is decremented exactly 1 time
 ```
 
 ---
 
-## 5. Automated Nightly Reconciliation Worker (Auto-Healer)
-
-Even with webhook locks, what if your server was down for 30 minutes?
-* **Specification:** A cron worker runs daily at 02:00 AM UTC.
-* **Logic:** 
-  1. Queries all orders with `status = 'PENDING'` older than 2 hours.
-  2. Calls the payment gateway's REST API: `GET /v1/charges?payment_intent={id}`.
-  3. If gateway says `SUCCESS`, marks the order `PAID` with note `AUTO_RECONCILED_BY_CRON`.
-  4. If gateway says `EXPIRED` or `FAILED`, releases the reserved inventory back to available stock.
+## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
+* **Contraindications:** Do not implement distributed Redis mutexes for zero-cost free trials or non-financial user interactions where duplicates carry zero financial liability.
+* **Performance Overhead:** Distributed locking adds 2–6 milliseconds of latency per webhook call.
+* **Complexity Burden:** Requires monitoring Redis memory utilization and setting proper TTL expiry (default: 60s processing lock, 24h completion marker).

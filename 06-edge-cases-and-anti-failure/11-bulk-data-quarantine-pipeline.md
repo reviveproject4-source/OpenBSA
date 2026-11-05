@@ -1,21 +1,30 @@
 # Blueprint 11: Bulk Data Ingestion & Quarantine Pipeline
 
-> **Target Problem:** A business owner migrates from legacy software and uploads an Excel spreadsheet of 15,000 customers. At row #4,821, there is a broken email format and invalid characters. The developer's naive script crashes midway, leaving 4,820 customers inserted and 10,180 missing, with no log of what succeeded or failed.
+> **Target Problem:** A business owner migrates from legacy software and uploads an Excel spreadsheet of 15,000 customers. At row #4,821, there is a corrupted email and broken characters. The developer's naive script crashes midway, leaving 4,820 rows inserted, 10,180 missing, and no log of what succeeded or failed.
 
 ---
 
-## 1. The Nightmare Scenario
-A newly signed retail client tries to import their master product inventory via a CSV file containing 25,000 SKUs. 
-The developer wrote a synchronous web endpoint: `POST /api/products/import-csv`. 
-The file upload times out at 30 seconds due to Nginx gateway limits. 
-The client tries uploading again. Now the database contains duplicate SKUs, broken pricing, and half-migrated records. 
-The client demands a refund and cancels their SaaS contract before their first month ends.
+## 1. Assumptions (Asumsi)
+* **Messy Legacy Data:** Real-world customer uploads (CSV/Excel) from non-technical business operators will always contain typos, misplaced columns, broken UTF-8 characters, and invalid formatting.
+* **HTTP Timeout Vulnerability:** Parsing files with > 1,000 rows in a synchronous web request thread will trigger HTTP 504 Gateway Timeouts from cloud load balancers (AWS ALB, Cloudflare, Nginx).
+* **High Partial-Success Value:** Business operators prefer 98% of valid rows to be ingested immediately, with the remaining 2% isolated into a downloadable error file.
 
 ---
 
-## 2. Architectural Blueprint: Asynchronous Ingestion & Quarantine Bucket
+## 2. Prerequisites (Prasyarat)
+* **Object Storage:** S3, Google Cloud Storage, or Supabase Storage for temporary holding of uploaded raw files.
+* **Background Worker Queue:** Asynchronous job processing (BullMQ, Celery, or AWS SQS).
 
-Never process bulk file uploads synchronously in a HTTP request thread. All bulk ingestions must follow the **Asynchronous Chunking & Error Quarantine** pattern:
+---
+
+## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
+* **The Failure Story:** An onboarding client uploads a 20,000-SKU product catalog. The backend processes the file inside the synchronous API route `POST /api/products/upload`. At 30 seconds, Cloudflare returns a `524 Gateway Timeout`. The client clicks "Upload" again. Now the database contains duplicate SKUs, broken pricing, and half-migrated records. Cleaning up the corrupted database takes 4 days of developer consulting time.
+* **Financial Impact:** $3,000 in emergency database engineering cleanup, client onboarding delay, and early churn risk.
+* **Blast Radius:** Product catalogs, pricing accuracy, inventory counts, and web server RAM exhaustion.
+
+---
+
+## 4. Architectural Blueprint & DDL (Spesifikasi Arsitektur)
 
 ```mermaid
 graph TD
@@ -24,30 +33,28 @@ graph TD
     classDef valid fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px;
 
-    User[User Uploads CSV / Excel File]:::client --> S3[Saved to Object Storage / S3]:::client
-    S3 --> Event[Emit Event: <code>file_uploaded</code>]:::worker
-    
-    Event --> Worker[Background Worker Process]:::worker
-    Worker --> Parser[Stream & Validate Row-by-Row in Batches of 500]:::worker
+    User[User Uploads CSV/Excel File]:::client --> Storage[Upload directly to S3 / Cloud Storage]:::client
+    Storage --> Event[Emit Job: <code>process_bulk_import</code>]:::worker
 
-    Parser --> Check{Is Row Valid?}
-    Check -->|YES: Valid SKU & Price| BatchInsert[Bulk Insert into Production DB]:::valid
-    Check -->|NO: Corrupted Format / Missing Data| Quarantine[Write to Quarantine Error Table<br/><i>Row Number + Error Reason</i>]:::error
+    Event --> Worker[Asynchronous Stream Worker]:::worker
+    Worker --> Batch[Read in Batches of 500 Rows]:::worker
 
-    BatchInsert --> Summary[Generate Ingestion Summary Report]:::worker
-    Quarantine --> Summary
-    Summary --> Notification[Notify User via Email / In-App:<br/><i>'14,850 rows imported. 150 rows quarantined. Download Error CSV.'</i>]:::client
+    Batch --> Validate{Row Validation Gate}
+    Validate -->|Valid Format| Insert[Bulk INSERT into Production Table]:::valid
+    Validate -->|Corrupted / Invalid| Quarantine[Insert into import_quarantine_records]:::error
+
+    Insert --> Complete[Update Job Status: COMPLETED]:::worker
+    Quarantine --> Complete
+    Complete --> Notify[Notify User: '14,850 rows imported. 150 quarantined. Download Error CSV.']:::client
 ```
 
----
-
-## 3. Database Specification: The Ingestion Audit & Quarantine Schema
-
 ```sql
+-- Production DDL: Ingestion Audit & Quarantine Schema
 CREATE TABLE data_import_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     file_name VARCHAR(255) NOT NULL,
+    entity_type VARCHAR(50) NOT NULL, -- 'PRODUCTS', 'CUSTOMERS', 'INVENTORY'
     total_rows INT NOT NULL DEFAULT 0,
     successful_rows INT NOT NULL DEFAULT 0,
     quarantined_rows INT NOT NULL DEFAULT 0,
@@ -59,17 +66,50 @@ CREATE TABLE data_import_jobs (
 CREATE TABLE import_quarantine_records (
     id BIGSERIAL PRIMARY KEY,
     job_id UUID NOT NULL REFERENCES data_import_jobs(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
     row_number INT NOT NULL,
     raw_row_data JSONB NOT NULL,
-    rejection_reason VARCHAR(255) NOT NULL, -- e.g. 'INVALID_EMAIL_FORMAT', 'DUPLICATE_BARCODE'
+    rejection_reason VARCHAR(255) NOT NULL, -- e.g. 'INVALID_EMAIL_FORMAT', 'DUPLICATE_SKU'
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_quarantine_job ON import_quarantine_records(job_id);
 ```
 
 ---
 
-## 4. User Experience Requirement
+## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
+* **The "Download Fix-Only CSV" Feature:**
+  The web app generates a CSV containing ONLY the failed rows with a new column prepended: `Error_Reason`. The user fixes only those 150 rows in Excel and re-uploads without touching the 14,850 rows that succeeded.
+* **Worker Crash Recovery (Checkpointing):**
+  The background worker records progress after every batch of 500 rows. If the worker pod restarts, it resumes from the last committed row index rather than starting over from row 1.
 
-The user is NEVER shown a generic 500 error screen. Instead:
-1. The system displays a progress bar: `"Processing: 45% (6,750 / 15,000 rows)..."`
-2. At completion, if errors occurred, the user is provided a 1-click button: **"Download Quarantined Rows (.csv)"**. This CSV contains only the 150 failed rows with a new column explaining exactly why each row was rejected, allowing the business owner to fix and re-upload only the corrected rows.
+---
+
+## 6. Security Boundary & Access Scope (Batas Keamanan)
+* **MIME-Type & Extension Whitelist:** Server strictly validates file headers before storage (only `text/csv`, `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`). Executable extensions (`.exe`, `.sh`, `.php`) are rejected.
+* **CSV Injection Defense:** Any cell starting with formula characters (`=`, `+`, `-`, `@`) is prepended with a single quote (`'`) to prevent formula execution attacks when exported back to Excel.
+
+---
+
+## 7. Test Scenarios (Skenario Pengujian)
+
+```gherkin
+Feature: Bulk Data Ingestion & Quarantine Pipeline
+
+  Scenario: Bulk Import with Interspersed Corrupted Rows
+    Given a CSV file containing 1,000 customer rows
+    And row #45 has an invalid email "john.doe@"
+    And row #102 has missing required phone number
+    When the asynchronous ingestion worker processes the file
+    Then exactly 998 rows are inserted into the production "customers" table
+    And exactly 2 rows are inserted into "import_quarantine_records"
+    And the job status updates to "COMPLETED"
+    And the user is provided a downloadable CSV containing the 2 quarantined rows
+```
+
+---
+
+## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
+* **Contraindications:** Do not implement asynchronous background pipelines for small single-record forms (e.g. creating 1 customer manually). Synchronous API responses are appropriate for inputs under 10 records.
+* **Storage Retention:** Quarantined rows consume database storage. Implement an automated 30-day retention cleanup policy (`DELETE FROM import_quarantine_records WHERE created_at < NOW() - INTERVAL '30 days'`).
