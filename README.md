@@ -129,6 +129,7 @@ graph TD
 
 | Module Directory | Contents & Purpose |
 |------------------|--------------------|
+| [`00-governance-and-standards/`](./00-governance-and-standards/) | **P0 Foundation:** Analysis Integrity Standard (AIS), Seven-Pillar Standard (7PS), Rules of Evidence, and Standard Glossary. |
 | [`01-core-templates/`](./01-core-templates/) | Enterprise PRD, SRS, Architecture Decision Records (ADRs), Non-Functional Checklists. |
 | [`02-diagrams-as-code/`](./02-diagrams-as-code/) | Native Mermaid.js diagrams: C4 models, sequence flows, state machines, ERD models. |
 | [`03-data-and-api-specs/`](./03-data-and-api-specs/) | API contracts, Source-to-Target mapping (STTM), and decoupled event pub/sub specs. |
