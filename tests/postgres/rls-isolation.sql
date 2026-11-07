@@ -136,6 +136,36 @@ END
 $$;
 COMMIT;
 
+-- A malformed tenant UUID must fail closed with a cast error, not broaden access.
+BEGIN;
+SELECT set_config('app.current_tenant_id', 'not-a-uuid', true);
+DO $
+BEGIN
+    BEGIN
+        PERFORM 1 FROM tenant_test.customer_invoices;
+        RAISE EXCEPTION 'Malformed tenant context was unexpectedly accepted';
+    EXCEPTION
+        WHEN invalid_text_representation THEN
+            NULL;
+    END;
+END
+$;
+COMMIT;
+
+-- Threat-model demonstration: the custom GUC is not authentication.
+-- A principal with arbitrary SQL as app_runtime can change its own context.
+-- This is why the application must never expose arbitrary SQL execution.
+BEGIN;
+SELECT set_config('app.current_tenant_id', '22222222-2222-4222-8222-222222222222', true);
+DO $
+BEGIN
+    IF (SELECT count(*) FROM tenant_test.customer_invoices) <> 1 THEN
+        RAISE EXCEPTION 'Expected the test role to demonstrate its ability to change the custom GUC';
+    END IF;
+END
+$;
+COMMIT;
+
 -- Cross-tenant INSERT must be rejected by WITH CHECK.
 BEGIN;
 SELECT set_config('app.current_tenant_id', '11111111-1111-4111-8111-111111111111', true);
