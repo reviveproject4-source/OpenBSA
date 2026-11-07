@@ -70,7 +70,7 @@ jobs:
           section = source.split(section_marker, 1)[1]
           fence = chr(96) * 3
           blocks = re.findall(re.escape(fence) + r"sql\s*(.*?)" + re.escape(fence), section, flags=re.I | re.S)
-          sql = "\\n\\n".join(block.strip() for block in blocks if block.strip())
+          sql = "\n\n".join(block.strip() for block in blocks if block.strip())
           required = (
               "CREATE TABLE private.tenant_context_keys",
               "CREATE FUNCTION private.current_tenant_id()",
@@ -80,7 +80,7 @@ jobs:
           missing = [marker for marker in required if marker not in sql]
           if missing:
               raise SystemExit(f"Required signed-context SQL is missing: {missing}")
-          Path("/tmp/openbsa-rls-blueprint.sql").write_text(sql + "\\n", encoding="utf-8")
+          Path("/tmp/openbsa-rls-blueprint.sql").write_text(sql + "\n", encoding="utf-8")
           PY
       - name: Run PostgreSQL tenant-isolation tests
         run: psql -v ON_ERROR_STOP=1 -f tests/postgres/rls-isolation.sql
