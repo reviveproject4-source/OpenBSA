@@ -72,7 +72,15 @@ jobs:
           match = re.search(re.escape(fence) + r"sql\s*(.*?)" + re.escape(fence), section, flags=re.I | re.S)
           if not match:
               raise SystemExit("RLS SQL code block was not found in section 4")
-          Path("/tmp/openbsa-rls-blueprint.sql").write_text(match.group(1).strip() + "\n", encoding="utf-8")
+          sql = match.group(1).strip()
+          sql, replaced = re.subn(
+              r"(?m)^SELECT set_config\('app.current_tenant_id', \$1, true\);\s*$",
+              "-- Application-driver bind placeholder; concrete values are exercised in the test SQL.",
+              sql,
+          )
+          if replaced != 1:
+              raise SystemExit("Expected exactly one parameterized tenant-context example")
+          Path("/tmp/openbsa-rls-blueprint.sql").write_text(sql + "\n", encoding="utf-8")
           PY
       - name: Run PostgreSQL tenant-isolation tests
         run: psql -v ON_ERROR_STOP=1 -f tests/postgres/rls-isolation.sql
