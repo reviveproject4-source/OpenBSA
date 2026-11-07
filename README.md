@@ -1,4 +1,4 @@
-# ⚡ system-blueprint-os
+# ⚡ OpenBSA
 > **The Open Business-to-Engineering (B2E) Specification Framework.**  
 > *Bridging Founder Vision with Engineering Execution — Anticipating the Critical Edge Cases Before You Write Code or Sign a Dev Contract.*
 
@@ -12,7 +12,7 @@
 [![Mermaid Powered](https://img.shields.io/badge/Diagrams-Mermaid.js-ff69b4?style=for-the-badge)](https://mermaid.js.org/)
 [![Author: Tri Raida](https://img.shields.io/badge/Author-Tri%20Raida-success?style=for-the-badge)](https://github.com/reviveproject4-source)
 
-**A rigorous architectural framework, visual process models, and battle-tested failure-mode blueprints designed by an operator-turned-systems-analyst.**
+**A structured business and system analysis framework, visual process models, and reference failure-mode blueprints designed by an operator-turned-systems-analyst.**
 
 [Read the B2E Framework Guide](./FRAMEWORK.md) • [Explore 14 Blueprints](./06-edge-cases-and-anti-failure/) • [Launch Web Studio](./web/) • [Consulting & Advisory](./SERVICES.md)
 
@@ -22,7 +22,7 @@
 
 ## 🏛️ The Two-Tier Governance Standard: Substance Over Checkboxes
 
-`system-blueprint-os` is not a casual library of 14 markdown files. It is an operational **Business-to-Engineering (B2E) Specification Framework** designed to bridge the chasm between commercial business operators and software engineering teams.
+`OpenBSA` is not a casual library of 14 markdown files. It is an operational **Business-to-Engineering (B2E) Specification Framework** designed to bridge the chasm between commercial business operators and software engineering teams.
 
 > **Crucial Rule:** In this framework, **no blueprint may claim "Enterprise-Ready" status simply because all headings are filled.** Readiness is strictly evidence-based, governed by two independent layers of scrutiny:
 
@@ -52,7 +52,7 @@ Most software projects don't fail because the code syntax was broken. **They fai
 * **Founders & SMB Owners** burn $30k–$100k on dev agencies because requirements were vague, scope crept out of control, and operational realities (cash flow, tax audits, staff fraud) were omitted.
 * **Software Engineers** dread vague client briefs like *"Build me an Uber-like app for laundry, it should be simple"*, leading to infinite scope arguments, unpaid revision loops, and broken weekend deployments.
 
-`system-blueprint-os` is the open-source cure. It provides **pre-engineered, developer-ready specifications** for the edge cases that normally destroy projects 3–6 months after launch.
+`OpenBSA` is the open-source cure. It provides **pre-engineered, developer-ready specifications** for the edge cases that normally destroy projects 3–6 months after launch.
 
 ---
 
@@ -65,7 +65,7 @@ graph LR
     classDef smb fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef os fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
 
-    F[SaaS Founders & Startups]:::founder --> OS[system-blueprint-os]:::os
+    F[SaaS Founders & Startups]:::founder --> OS[OpenBSA]:::os
     D[Software Engineers & Tech Leads]:::dev --> OS
     S[Small Business Owners & Operators]:::smb --> OS
 
@@ -82,7 +82,7 @@ graph LR
 
 ## 🛡️ The 14 Anti-Failure Blueprints ("Before People Think of It, We Solved It")
 
-Explore the [`06-edge-cases-and-anti-failure/`](./06-edge-cases-and-anti-failure/) directory for production-ready PostgreSQL DDL, Mermaid state machines, and BDD acceptance criteria:
+PostgreSQL DDL examples, Mermaid visual flows, and BDD acceptance criteria intended for review and adaptation:
 
 | # | Blueprint Specification | The Hidden Trap Solved |
 |---|-------------------------|------------------------|
@@ -135,7 +135,7 @@ graph TD
 | [`03-data-and-api-specs/`](./03-data-and-api-specs/) | API contracts, Source-to-Target mapping (STTM), and decoupled event pub/sub specs. |
 | [`04-agile-and-qa/`](./04-agile-and-qa/) | Gherkin BDD (`Given-When-Then`) user stories and Requirements Traceability Matrix (RTM). |
 | [`05-modern-ai-spec/`](./05-modern-ai-spec/) | Specifications for AI agents, prompt contract guardrails, and deterministic fallback logic. |
-| [`06-edge-cases-and-anti-failure/`](./06-edge-cases-and-anti-failure/) | The 14 battle-tested failure-mode blueprints with database schemas and state machines. |
+14 reference failure-mode blueprints with database schemas and state machines. Maturity varies by blueprint; consult each document's status and evidence.
 | [`web/`](./web/) | **Interactive Vercel-ready Web Application** (Scope Risk Calculator & Spec Generator). |
 
 ---
