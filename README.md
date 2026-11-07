@@ -77,6 +77,18 @@ It also distinguishes confirmed facts from assumptions, possible gaps, and stake
 
 ---
 
+## 🤝 Business-to-Developer Handoff: Make the Analysis Actionable
+
+OpenBSA aims to give developers more than a feature list. A useful handoff explains the business problem, desired outcome, process, roles, business rules, important exceptions, plausible future gaps, acceptance criteria, and unresolved decisions—without forcing a programming language or technical architecture.
+
+- **[Business-to-Developer Handoff Standard](./00-governance-and-standards/09-business-to-developer-handoff-standard.md)** — what a developer should be able to understand before estimation and implementation.
+- **[Business-to-Developer Handoff Pack](./01-core-templates/05-business-to-developer-handoff-pack.md)** — a practical template for preparing the project handoff.
+- **[Worked Example: Refund Request](./07-worked-examples/01-refund-request-handoff-example.md)** — demonstrates how a simple "refund button" request becomes a clear business process with rules, exceptions, open decisions, and acceptance criteria.
+
+**The intended result:** a developer can see what the business needs, which risks have already been considered, what is still undecided, and how the business will judge whether the solution is correct. Developers remain free to choose the technical implementation.
+
+---
+
 ## 👥 Who This Is Built For
 
 ```mermaid
@@ -150,6 +162,17 @@ graph TD
 
 | Module Directory | Contents & Purpose |
 |------------------|--------------------|
+| [`00-governance-and-standards/`](./00-governance-and-standards/) | **P0 Foundation:** AIS, 7PS, Rules of Evidence, Standard Glossary, Anticipatory Gap Analysis, and Business-to-Developer Handoff standards. |
+| [`01-core-templates/`](./01-core-templates/) | PRD, SRS, Architecture Decision Records (ADRs), Non-Functional Checklists, Anticipatory Gap Register, and Business-to-Developer Handoff Pack. |
+| [`02-diagrams-as-code/`](./02-diagrams-as-code/) | Native Mermaid.js diagrams: C4 models, sequence flows, state machines, ERD models. |
+| [`03-data-and-api-specs/`](./03-data-and-api-specs/) | API contracts, Source-to-Target mapping (STTM), and decoupled event pub/sub specs. |
+| [`04-agile-and-qa/`](./04-agile-and-qa/) | Gherkin BDD (`Given-When-Then`) user stories and Requirements Traceability Matrix (RTM). |
+| [`05-modern-ai-spec/`](./05-modern-ai-spec/) | Specifications for AI agents, prompt contract guardrails, and deterministic fallback logic. |
+| [`06-edge-cases-and-anti-failure/`](./06-edge-cases-and-anti-failure/) | Reference failure-mode blueprints with business and technical controls; maturity varies by blueprint. |
+| [`07-worked-examples/`](./07-worked-examples/) | Worked examples showing how business analysis becomes a developer-readable handoff. |
+| [`web/`](./web/) | Interactive Web Studio for scope review, specification drafting, and diagrams. |
+
+------------------|--------------------|
 | [`00-governance-and-standards/`](./00-governance-and-standards/) | **P0 Foundation:** Analysis Integrity Standard (AIS), Seven-Pillar Standard (7PS), Rules of Evidence, and Standard Glossary. |
 | [`01-core-templates/`](./01-core-templates/) | Enterprise PRD, SRS, Architecture Decision Records (ADRs), Non-Functional Checklists. |
 | [`02-diagrams-as-code/`](./02-diagrams-as-code/) | Native Mermaid.js diagrams: C4 models, sequence flows, state machines, ERD models. |
