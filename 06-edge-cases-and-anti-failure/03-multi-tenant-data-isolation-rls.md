@@ -36,6 +36,7 @@ CREATE ROLE app_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION 
 -- The runtime role must not own tenant tables and must not inherit a role
 -- that owns them or has BYPASSRLS/SUPERUSER.
 -- Grant only the required schema and table privileges.
+GRANT USAGE, CREATE ON SCHEMA public TO app_owner;
 GRANT USAGE ON SCHEMA public TO app_runtime;
 
 -- Table-level grants are applied after the tenant tables are created (section 4).
