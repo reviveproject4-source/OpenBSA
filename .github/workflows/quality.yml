@@ -73,7 +73,7 @@ jobs:
           sql = "\n\n".join(block.strip() for block in blocks if block.strip())
           required = (
               "CREATE TABLE private.tenant_context_keys",
-              "CREATE FUNCTION private.current_tenant_id()",
+              "FUNCTION private.current_tenant_id()",
               "CREATE TABLE tenants",
               "CREATE POLICY invoice_tenant_isolation",
           )
