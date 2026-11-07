@@ -637,7 +637,7 @@ graph TD
       if (selectedModules.includes('rls')) {
         md += `### Blueprint 03: PostgreSQL Row-Level Security (RLS)\n`;
         md += `- **Assumptions:** Shared-database multi-tenancy; developers will occasionally forget manual \`WHERE tenant_id = ?\`.\n`;
-        md += `- **Prerequisites:** PostgreSQL 12+ with \`FORCE ROW LEVEL SECURITY\` enabled.\n`;
+        md += `- **Prerequisites:** PostgreSQL with RLS; runtime role must be non-owner, non-superuser, and NOBYPASSRLS.\n`;
         md += `- **Failure Scenario:** Export feature leaks Company B's confidential pricing to Company A, violating GDPR.\n`;
         md += `- **Architecture & DDL:** \`CREATE POLICY tenant_isolation_policy ON customer_invoices FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::UUID)\`.\n`;
         md += `- **Recovery Strategy:** Missing context yields no matching rows and rejects tenant writes; malformed UUID raises an error.\n`;
