@@ -64,19 +64,22 @@ jobs:
           import re
 
           source = Path("06-edge-cases-and-anti-failure/03-multi-tenant-data-isolation-rls.md").read_text(encoding="utf-8")
-          section_marker = "## 4. Tenant context and policy example"
+          section_marker = "## 4. Signed tenant context and RLS policy"
           if section_marker not in source:
               raise SystemExit("RLS blueprint section 4 was not found")
           section = source.split(section_marker, 1)[1]
           fence = chr(96) * 3
           blocks = re.findall(re.escape(fence) + r"sql\s*(.*?)" + re.escape(fence), section, flags=re.I | re.S)
-          sql = next(
-              (block.strip() for block in blocks
-               if "CREATE TABLE tenants" in block and "CREATE POLICY invoice_tenant_isolation" in block),
-              None,
+          sql = "\n\n".join(block.strip() for block in blocks if block.strip())
+          required = (
+              "CREATE TABLE private.tenant_context_keys",
+              "FUNCTION private.current_tenant_id()",
+              "CREATE TABLE tenants",
+              "CREATE POLICY invoice_tenant_isolation",
           )
-          if not sql:
-              raise SystemExit("Executable tenant table and RLS policy SQL was not found in section 4")
+          missing = [marker for marker in required if marker not in sql]
+          if missing:
+              raise SystemExit(f"Required signed-context SQL is missing: {missing}")
           Path("/tmp/openbsa-rls-blueprint.sql").write_text(sql + "\n", encoding="utf-8")
           PY
       - name: Run PostgreSQL tenant-isolation tests
