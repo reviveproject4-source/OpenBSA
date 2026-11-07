@@ -454,7 +454,7 @@
         <div class="mermaid text-center text-sm" id="active-mermaid-code">
 graph TD
     User([Tenant Operator / Staff]) -->|HTTPS / JWT| Gateway[Auth & API Gateway]
-    Gateway -->|Sets DB Session: app.current_tenant_id| Engine[Core Business Engine]
+    Gateway -->|Sets transaction-local tenant context after server-side authorization| Engine[Core Business Engine]
     Engine --> RLS[PostgreSQL Kernel Row-Level Security]
     RLS -->|Strict Isolation Policy| TenantData[(Tenant-Specific Data)]
     RLS -.->|BLOCKED SILENTLY| OtherTenants[(Other Tenant Records)]
@@ -638,11 +638,11 @@ graph TD
         md += `### Blueprint 03: PostgreSQL Row-Level Security (RLS)\n`;
         md += `- **Assumptions:** Shared-database multi-tenancy; developers will occasionally forget manual \`WHERE tenant_id = ?\`.\n`;
         md += `- **Prerequisites:** PostgreSQL with RLS; runtime role must be non-owner, non-superuser, and NOBYPASSRLS.\n`;
-        md += `- **Failure Scenario:** Export feature leaks Company B's confidential pricing to Company A, violating GDPR.\n`;
+        md += `- **Failure Scenario:** A missing tenant predicate exposes Company B's invoice fields to Company A.\n`;
         md += `- **Architecture & DDL:** Apply RLS policies to every tenant-owned table; use \`NULLIF(current_setting('app.current_tenant_id', true), '')::uuid\` and set context transaction-locally after server-side tenant authorization.\n`;
         md += `- **Recovery Strategy:** Missing context yields no matching rows and rejects tenant writes; malformed UUID raises an error.\n`;
         md += `- **Security Boundary:** Tenant claim is validated server-side; a custom PostgreSQL setting is context, not an independent authentication mechanism.\n`;
-        md += `- **Test Scenario (BDD):** Querying another company's invoice ID returns HTTP 404 with 0 bytes leaked.\n`;
+        md += `- **Test Scenario (BDD):** A query for another tenant's invoice ID returns no protected invoice fields; the API applies its documented not-found behavior.\n`;
         md += `- **Batasan Penerapan:** Do not use for enterprise contracts requiring physically dedicated isolated servers.\n\n`;
       }
 
@@ -738,7 +738,7 @@ graph TD
     const diagramSources = {
       rls: `graph TD
     User([Tenant Operator / Staff]) -->|HTTPS / JWT| Gateway[Auth & API Gateway]
-    Gateway -->|Sets DB Session: app.current_tenant_id| Engine[Core Business Engine]
+    Gateway -->|Sets transaction-local tenant context after server-side authorization| Engine[Core Business Engine]
     Engine --> RLS[PostgreSQL Kernel Row-Level Security]
     RLS -->|Strict Isolation Policy| TenantData[(Tenant-Specific Data)]
     RLS -.->|BLOCKED SILENTLY| OtherTenants[(Other Tenant Records)]`,
