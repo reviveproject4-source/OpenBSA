@@ -30,7 +30,7 @@ Use separate roles for migrations/ownership and runtime access. The following is
 
 ```sql
 -- Run as a controlled database administrator.
-CREATE ROLE app_owner NOLOGIN;
+CREATE ROLE app_owner NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 CREATE ROLE app_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 
 -- The runtime role must not own tenant tables and must not inherit a role
