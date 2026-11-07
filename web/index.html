@@ -596,12 +596,12 @@ graph TD
       md += `## 📋 Two-Tier Governance & Verification Sign-Off\n\n`;
       md += `| Governance Standard | Verification Parameter | Verification Status |\n`;
       md += `|---|---|---|\n`;
-      md += `| **AIS Dimension 1** | Mathematical & Financial Rigor (Integer Cents, Zero Float Drift) | ✅ VERIFIED |\n`;
-      md += `| **AIS Dimension 2** | Cross-Blueprint Traceability & Invariant Consistency | ✅ VERIFIED |\n`;
-      md += `| **AIS Dimension 3** | Empirical Reality Check (Worst-case failure & blast radius) | ✅ VERIFIED |\n`;
-      md += `| **AIS Dimension 4** | Requirement Integrity & Evidence Traceability (Anchored to PRD/Statute) | ✅ VERIFIED |\n`;
-      md += `| **Tier 2 Standard** | Seven-Pillar Blueprint Standard (8 Operational Sections) | ✅ STRUCTURED |\n`;
-      md += `| **Maturity Rating** | Evidence-Based Classification (Non-Checkbox Verification) | **Level 2: SPEC_COMPLETE** |\n\n`;
+      md += `| **AIS Dimension 1** | Mathematical & Financial Rigor | ⏳ NOT ASSESSED — evidence required |\n`;
+      md += `| **AIS Dimension 2** | Cross-Blueprint Traceability & Invariant Consistency | ⏳ NOT ASSESSED — evidence required |\n`;
+      md += `| **AIS Dimension 3** | Empirical Reality Check (Worst-case failure & blast radius) | ⏳ NOT ASSESSED — evidence required |\n`;
+      md += `| **AIS Dimension 4** | Requirement Integrity & Evidence Traceability | ⏳ NOT ASSESSED — evidence required |\n`;
+      md += `| **Tier 2 Standard** | Blueprint structure | ⏳ DRAFT — completeness not assessed |\n`;
+      md += `| **Maturity Rating** | Evidence-Based Classification | **Level 1: PROPOSED / DRAFT** |\n\n`;
       md += `## 1. Executive Scope & Contractual Boundaries\n`;
       md += `This specification establishes deterministic engineering constraints, database integrity policies, and automated recovery strategies for **${appName}** based on the 7 Invariant Pillars.\n\n`;
       md += `### In-Scope vs Explicitly Out-of-Scope\n`;
@@ -640,8 +640,8 @@ graph TD
         md += `- **Prerequisites:** PostgreSQL 12+ with \`FORCE ROW LEVEL SECURITY\` enabled.\n`;
         md += `- **Failure Scenario:** Export feature leaks Company B's confidential pricing to Company A, violating GDPR.\n`;
         md += `- **Architecture & DDL:** \`CREATE POLICY tenant_isolation_policy ON customer_invoices FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::UUID)\`.\n`;
-        md += `- **Recovery Strategy:** Fails closed (returns 0 rows) if tenant context is missing or unverified.\n`;
-        md += `- **Security Boundary:** Tenant claim extracted strictly from cryptographically signed JWT session.\n`;
+        md += `- **Recovery Strategy:** Missing context yields no matching rows and rejects tenant writes; malformed UUID raises an error.\n`;
+        md += `- **Security Boundary:** Tenant claim is validated server-side; a custom PostgreSQL setting is context, not an independent authentication mechanism.\n`;
         md += `- **Test Scenario (BDD):** Querying another company's invoice ID returns HTTP 404 with 0 bytes leaked.\n`;
         md += `- **Batasan Penerapan:** Do not use for enterprise contracts requiring physically dedicated isolated servers.\n\n`;
       }
