@@ -5,7 +5,7 @@
 
 ## 1. The Core Philosophy: Substance Over Checkboxes
 
-In `system-blueprint-os` (OpenBSA), **no blueprint may claim "Enterprise-Ready" status simply because all template sections are filled.**
+In `OpenBSA` (OpenBSA), **no blueprint may claim "Enterprise-Ready" status simply because all template sections are filled.**
 
 Completing seven structural headings is merely a syntactic prerequisite. True readiness is governed by **substantive analysis quality, empirical verification, mathematical proof, and operational traceability.**
 
@@ -85,13 +85,13 @@ Every blueprint specification must provide complete operational controls across 
 
 ## 4. The Evidence-Based Maturity Rating System (Kelayakan Berbasis Bukti)
 
-Every blueprint in `system-blueprint-os` carries an explicit, honest **Maturity Rating Badge**:
+Every blueprint in `OpenBSA` carries an explicit, honest **Maturity Rating Badge**:
 
 ```mermaid
 stateDiagram-v2
     [*] --> Level1_Proposed: Initial Concept Drafted
     Level1_Proposed --> Level2_SpecComplete: Passes Tier 1 (AIS 4 Dimensions) + Tier 2 (7PS Anatomy)
-    Level2_SpecComplete --> Level3_BattleTested: Verified with Live Production Evidence (ROTARI / Stress Benchmarks)
+    Level2_SpecComplete --> Level3_BattleTested: Verified only with linked, deployment-specific production or reproducible stress-test evidence
 ```
 
 ### Level 1: `PROPOSED / DRAFT` 🟡
@@ -106,7 +106,7 @@ stateDiagram-v2
 * **Status:** Ready for implementation and sprint planning.
 
 ### Level 3: `BATTLE-TESTED / VERIFIED` 🟢
-* **Empirically Proven:** The specification has been deployed in a live production environment (such as **ROTARI** multi-tenant retail platform), survived real-world concurrency loads, or passed automated database integration stress tests.
+* **Empirically Proven:** The specification has been deployed in a live production environment (in a named deployment with reproducible test evidence linked in the blueprint), survived real-world concurrency loads, or passed automated database integration stress tests.
 * Zero unresolved edge-case vulnerabilities.
 * **Status:** Gold standard reference architecture.
 
