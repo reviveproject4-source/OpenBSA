@@ -68,7 +68,7 @@ Before any architectural solution or code is accepted, the business systems anal
 
 ## 3. Tier 2: The Seven-Pillar Blueprint Standard (7PS)
 
-Every blueprint specification must provide complete operational controls across eight structural sections:
+The standard defines seven invariant pillars, documented through eight mandatory structural sections:
 
 | Pillar | Engineering Mandate | Verification Criteria |
 |---|---|---|
@@ -101,7 +101,7 @@ stateDiagram-v2
 
 ### Level 2: `SPEC_COMPLETE` 🔵
 * All 4 dimensions of the **Analysis Integrity Standard (AIS)** have been verified.
-* All 8 sections of the **Seven-Pillar Blueprint Standard (7PS)** are fully authored.
+* All eight mandatory documentation sections of the **Seven-Pillar Blueprint Standard (7PS)** are fully authored.
 * Gherkin BDD test scenarios have been designed and peer-reviewed.
 * **Status:** Ready for implementation and sprint planning.
 
