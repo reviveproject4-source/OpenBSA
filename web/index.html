@@ -551,17 +551,17 @@ graph TD
       let description = '';
 
       if (score >= 70) {
-        riskLevel = 'EXTREME RISK OF COST OVERRUN (70-100%)';
+        riskLevel = 'HIGH SCOPE RISK (70-100 INDEX)';
         badgeClass = 'bg-red-500/10 text-red-400 border-red-500/30';
         description = 'Your answers indicate significant gaps in high-impact areas such as concurrency, idempotency, or tenant isolation. This score is a heuristic screening signal, not a statistical probability or forecast.';
       } else if (score >= 35) {
-        riskLevel = 'MODERATE SCOPE VULNERABILITY (35-69%)';
+        riskLevel = 'MODERATE SCOPE RISK (35-69 INDEX)';
         badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-        description = 'You have basic functionality covered, but critical edge cases (reconciliation, third-party circuit breakers, or integer rounding) are omitted. Expect unexpected production bugs post-launch.';
+        description = 'Some controls may be missing in areas such as reconciliation, third-party circuit breakers, or integer rounding. Review these gaps before implementation; this score does not predict production defects.';
       } else {
-        riskLevel = 'ROBUST ARCHITECTURAL MATURITY (< 35%)';
+        riskLevel = 'LOWER REPORTED SCOPE RISK (0-34 INDEX)';
         badgeClass = 'bg-brand-500/10 text-brand-400 border-brand-500/30';
-        description = 'Outstanding! You have prioritized defensive systems architecture and clear edge-case boundaries. Development will proceed with minimal rework.';
+        description = 'Your answers report coverage of the selected controls. This is not proof of architectural maturity; validate the design through review and implementation tests.';
       }
 
       container.className = `mt-8 p-6 rounded-2xl border ${score >= 70 ? 'bg-red-950/20 border-red-900/40' : (score >= 35 ? 'bg-amber-950/20 border-amber-900/40' : 'bg-emerald-950/20 border-emerald-900/40')}`;
@@ -570,11 +570,11 @@ graph TD
           <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${badgeClass}">
             ${riskLevel}
           </span>
-          <span class="text-2xl font-extrabold text-white font-mono">${score} / 100 Risk Index</span>
+          <span class="text-2xl font-extrabold text-white font-mono">${score} / 100 Heuristic Index</span>
         </div>
         <p class="text-sm text-slate-300 leading-relaxed mb-4">${description}</p>
         <div class="text-xs text-slate-400">
-          👉 <strong>Recommended Action:</strong> Attach the relevant blueprints from <code>OpenBSA</code> to your Statement of Work (SOW) before hiring engineering teams.
+          👉 <strong>Recommended Action:</strong> Use relevant <code>OpenBSA</code> blueprints as discussion inputs; tailor and validate them before including them in a Statement of Work (SOW).
         </div>
       `;
       lucide.createIcons();
