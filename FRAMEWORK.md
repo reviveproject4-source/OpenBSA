@@ -138,3 +138,60 @@ sequenceDiagram
     Architect->>Analyst: Execute concurrency stress test and automated self-healing crons
     Analyst->>Founder: Present verified audit reports; milestone approved for deployment
 ```
+
+---
+
+## 6. Anticipatory Gap Analysis — Seeing Beyond the Stated Requirement
+
+OpenBSA expects a BSA to look beyond the feature request and examine what the business may have missed. This is a business-analysis discipline, not a requirement to predict every possible failure or prescribe a particular technology.
+
+### 6.1 Separate facts from uncertainty
+
+Every material finding must be distinguished as:
+- **FACT:** supported by observation, records, or a reliable source.
+- **ASSUMPTION:** accepted temporarily for planning and still requiring validation.
+- **POSSIBLE GAP:** a missing rule, capability, decision, or scenario worth investigating.
+- **DECISION:** an explicit choice made by an accountable stakeholder.
+
+An unverified assumption must never be presented as a confirmed requirement.
+
+### 6.2 Look across the business, not only the requested feature
+
+Use the following discovery lenses where relevant:
+- Business goals, constraints, and scope boundaries.
+- People, roles, authority, delegation, and absence.
+- Normal workflows, exceptions, corrections, and workarounds.
+- Customer and stakeholder experience.
+- Data ownership, quality, retention, and recordkeeping.
+- Pricing, payments, refunds, reconciliation, and financial exposure.
+- Time, peak demand, growth, and operational capacity.
+- Suppliers, integrations, and external dependencies.
+- Security, misuse, privacy, and trust.
+- Continuity, recovery, change, migration, and exit.
+
+### 6.3 Explore plausible future conditions
+
+Consider relevant scenarios such as growth or contraction, key-person absence, service disruption, human error or abuse, policy or provider changes, disputes, and customer/vendor exit. For each selected scenario ask:
+
+1. What changes or triggers the situation?
+2. Who or what is affected?
+3. What business consequence could follow?
+4. How would the business notice early?
+5. What prevention, fallback, recovery, or decision is proportionate?
+
+### 6.4 Prioritize with honest evidence
+
+Assess impact, exposure, detectability, reversibility, and readiness. Use plain-language priorities (Critical, High, Medium, Low, Watch) and explain the rationale. Do not invent probabilities, financial losses, or numerical risk scores without defensible inputs.
+
+### 6.5 Convert analysis into decisions
+
+Each material gap should have a clear owner, evidence or uncertainty statement, trigger, consequence, priority rationale, proposed response, and review condition. The business may resolve it now, design for later, create a fallback, monitor it, investigate it, accept it explicitly, or document it as out of scope.
+
+The BSA identifies and explains the business need and acceptance outcome. Developers and technical specialists choose an appropriate implementation with stakeholders.
+
+**Reference documents:**
+- [Anticipatory Gap Analysis Standard](./00-governance-and-standards/08-anticipatory-gap-analysis-standard.md)
+- [Anticipatory Gap Register Template](./01-core-templates/04-anticipatory-gap-register.md)
+
+**Integrity rule:** A scenario is not proof that an event will occur. The objective is to make important uncertainty visible early and prepare a proportionate response—not to expand every project with speculative features.
+
