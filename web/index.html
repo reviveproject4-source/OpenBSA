@@ -503,7 +503,7 @@ graph TD
   <footer class="relative z-10 border-t border-slate-800/80 py-8 px-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
-        <span class="text-slate-300 font-semibold">system-blueprint-os</span> &copy; 2026 Tri Raida. Released under the MIT License.
+        <span class="text-slate-300 font-semibold">OpenBSA</span> &copy; 2026 Tri Raida. Released under the MIT License.
       </div>
       <div class="flex items-center gap-4">
         <a href="https://github.com/reviveproject4-source/OpenBSA" class="hover:text-slate-300 transition">GitHub</a>
@@ -574,7 +574,7 @@ graph TD
         </div>
         <p class="text-sm text-slate-300 leading-relaxed mb-4">${description}</p>
         <div class="text-xs text-slate-400">
-          👉 <strong>Recommended Action:</strong> Attach the relevant blueprints from <code>system-blueprint-os</code> to your Statement of Work (SOW) before hiring engineering teams.
+          👉 <strong>Recommended Action:</strong> Attach the relevant blueprints from <code>OpenBSA</code> to your Statement of Work (SOW) before hiring engineering teams.
         </div>
       `;
       lucide.createIcons();
@@ -592,7 +592,7 @@ graph TD
       });
 
       let md = `# 🏛️ Business-to-Engineering (B2E) Specification: ${appName}\n`;
-      md += `> **Domain:** ${domain.toUpperCase()} | **Lead Analyst:** ${author} | **Framework:** system-blueprint-os (B2E Spec Engine)\n\n`;
+      md += `> **Domain:** ${domain.toUpperCase()} | **Lead Analyst:** ${author} | **Framework:** OpenBSA (B2E Spec Engine)\n\n`;
       md += `## 📋 Two-Tier Governance & Verification Sign-Off\n\n`;
       md += `| Governance Standard | Verification Parameter | Verification Status |\n`;
       md += `|---|---|---|\n`;
@@ -603,7 +603,7 @@ graph TD
       md += `| **Tier 2 Standard** | Blueprint structure | ⏳ DRAFT — completeness not assessed |\n`;
       md += `| **Maturity Rating** | Evidence-Based Classification | **Level 1: PROPOSED / DRAFT** |\n\n`;
       md += `## 1. Executive Scope & Contractual Boundaries\n`;
-      md += `This specification establishes deterministic engineering constraints, database integrity policies, and automated recovery strategies for **${appName}** based on the 7 Invariant Pillars.\n\n`;
+      md += `This specification establishes deterministic engineering constraints, database integrity policies, and automated recovery strategies for **${appName}** based on the documented business and system invariants.\n\n`;
       md += `### In-Scope vs Explicitly Out-of-Scope\n`;
       md += `- **IN-SCOPE:** Core business state machines, atomic concurrency guards, immutable audit logging, and defensive recovery strategies.\n`;
       md += `- **OUT-OF-SCOPE:** Unbudgeted third-party integrations and unverified features not governed by formal Change Request (CR) sign-offs.\n\n`;
@@ -639,7 +639,7 @@ graph TD
         md += `- **Assumptions:** Shared-database multi-tenancy; developers will occasionally forget manual \`WHERE tenant_id = ?\`.\n`;
         md += `- **Prerequisites:** PostgreSQL with RLS; runtime role must be non-owner, non-superuser, and NOBYPASSRLS.\n`;
         md += `- **Failure Scenario:** Export feature leaks Company B's confidential pricing to Company A, violating GDPR.\n`;
-        md += `- **Architecture & DDL:** \`CREATE POLICY tenant_isolation_policy ON customer_invoices FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::UUID)\`.\n`;
+        md += `- **Architecture & DDL:** Apply RLS policies to every tenant-owned table; use \`NULLIF(current_setting('app.current_tenant_id', true), '')::uuid\` and set context transaction-locally after server-side tenant authorization.\n`;
         md += `- **Recovery Strategy:** Missing context yields no matching rows and rejects tenant writes; malformed UUID raises an error.\n`;
         md += `- **Security Boundary:** Tenant claim is validated server-side; a custom PostgreSQL setting is context, not an independent authentication mechanism.\n`;
         md += `- **Test Scenario (BDD):** Querying another company's invoice ID returns HTTP 404 with 0 bytes leaked.\n`;
