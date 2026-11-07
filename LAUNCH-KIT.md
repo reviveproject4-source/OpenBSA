@@ -1,4 +1,4 @@
-# 🚀 Community Launch Kit: system-blueprint-os
+# 🚀 Community Launch Kit: OpenBSA
 > **Field-Tested Social Media & Community Copy for LinkedIn & Reddit.**  
 > *Targeted specifically for: SaaS Founders, Small Business Owners, and Software Developers (Excluding BA Echo Chambers).*
 
@@ -34,7 +34,7 @@ Nobody documented the 14 unsexy operational edge cases before writing the first 
 
 As an entrepreneur-turned-analyst, I got tired of seeing founders get burned and developers get blamed.
 
-So I open-sourced: ⚡ system-blueprint-os
+So I open-sourced: ⚡ OpenBSA
 It's an Anti-Failure Architecture Engine with 14 battle-tested blueprints (PostgreSQL schemas, Mermaid visual flows, and BDD acceptance criteria) you can hand to your dev team before you sign a contract.
 
 👉 Explore the repo (100% Free & MIT): [Link to your GitHub]
@@ -60,7 +60,7 @@ Miscommunication kills more software projects than bad syntax ever will.
 
 As a Business Systems Analyst who has operated real businesses, I built an open-source tool to solve this forever:
 
-⚡ system-blueprint-os
+⚡ OpenBSA
 The Open Enterprise Specification & Anti-Failure Engine.
 
 Inside:
@@ -98,7 +98,7 @@ Within 90 days, things start falling apart:
 
 None of these are "coding bugs"—they are **business & system scoping failures**.
 
-To help other founders avoid burning their life savings, I spent the last few weeks compiling and open-sourcing: **system-blueprint-os**.
+To help other founders avoid burning their life savings, I spent the last few weeks compiling and open-sourcing: **OpenBSA**.
 
 It includes 14 battle-tested specifications with:
 1. The Real-World Failure Story (what goes wrong).
@@ -124,7 +124,7 @@ Hey r/webdev,
 
 How many times have you signed a client contract only for them to demand complex enterprise edge cases (offline sync, fraud audit trails, multi-tenant data isolation) halfway through the project and claim "it was implied"?
 
-To protect developers and bridge the gap with non-technical clients, I built **system-blueprint-os**.
+To protect developers and bridge the gap with non-technical clients, I built **OpenBSA**.
 
 What's inside:
 - **14 Anti-Failure Blueprints:** Real architectural patterns for the stuff clients never think about until production burns down:
@@ -152,4 +152,4 @@ If you find this useful for shielding your freelance projects from scope creep, 
 2. **When an overseas founder asks for help:**
    Point them to the repo, and offer a 30-minute discovery consultation using the link in `SERVICES.md`.
 3. **Cross-post to Indie Hackers & Hacker News (Show HN):**
-   Use the headline: *"Show HN: system-blueprint-os – Open-source edge-case specifications for founders and engineers"*.
+   Use the headline: *"Show HN: OpenBSA – Open-source edge-case specifications for founders and engineers"*.
