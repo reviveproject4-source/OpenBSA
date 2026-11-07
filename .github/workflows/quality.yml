@@ -25,11 +25,11 @@ jobs:
           import re
 
           html = Path("web/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r"<script(?:\\s[^>]*)?>(.*?)</script>", html, flags=re.I | re.S)
+          scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script>", html, flags=re.I | re.S)
           inline_scripts = [script for script in scripts if script.strip()]
           if not inline_scripts:
               raise SystemExit("No inline JavaScript found in web/index.html")
-          Path("/tmp/openbsa-inline.js").write_text("\\n".join(inline_scripts), encoding="utf-8")
+          Path("/tmp/openbsa-inline.js").write_text("\n".join(inline_scripts), encoding="utf-8")
           PY
       - name: Validate JavaScript syntax
         run: node --check /tmp/openbsa-inline.js
