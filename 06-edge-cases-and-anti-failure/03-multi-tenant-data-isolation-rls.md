@@ -37,7 +37,8 @@ CREATE ROLE app_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION 
 -- that owns them or has BYPASSRLS/SUPERUSER.
 -- Grant only the required schema and table privileges.
 GRANT USAGE ON SCHEMA public TO app_runtime;
-GRANT SELECT, INSERT, UPDATE, DELETE ON customer_invoices TO app_runtime;
+
+-- Table-level grants are applied after the tenant tables are created (section 4).
 ```
 
 Do not grant `TRUNCATE`, schema ownership, role membership with elevated privileges, or broad grants unless explicitly required and separately reviewed. Verify effective role membership and attributes in the deployed database.
@@ -77,6 +78,10 @@ CREATE TABLE customer_invoices (
     UNIQUE (tenant_id, invoice_number)
 );
 
+-- Assign ownership to the non-login migration/owner role. The runtime role must not own these tables.
+ALTER TABLE tenants OWNER TO app_owner;
+ALTER TABLE customer_invoices OWNER TO app_owner;
+
 ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tenants FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_self_access ON tenants
@@ -94,6 +99,10 @@ CREATE POLICY invoice_tenant_isolation ON customer_invoices
 
 CREATE INDEX customer_invoices_tenant_created_idx
     ON customer_invoices (tenant_id, created_at);
+
+-- Apply only the privileges the runtime application needs.
+GRANT SELECT ON tenants TO app_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON customer_invoices TO app_runtime;
 ```
 
 The example policy is illustrative. Add policies and least-privilege grants for every tenant-scoped table and command actually used by the application. Avoid permissive policies that accidentally broaden access; PostgreSQL combines permissive policies with OR semantics.
