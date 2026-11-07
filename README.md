@@ -12,7 +12,7 @@
 [![Mermaid Powered](https://img.shields.io/badge/Diagrams-Mermaid.js-ff69b4?style=for-the-badge)](https://mermaid.js.org/)
 [![Author: Tri Raida](https://img.shields.io/badge/Author-Tri%20Raida-success?style=for-the-badge)](https://github.com/reviveproject4-source)
 
-**A structured business and system analysis framework, visual process models, and reference failure-mode blueprints designed by an operator-turned-systems-analyst.**
+**A structured business analysis framework, visual process models, and reference failure-mode blueprints designed to make overlooked business needs visible before development.**
 
 [Read the B2E Framework Guide](./FRAMEWORK.md) • [Explore 14 Blueprints](./06-edge-cases-and-anti-failure/) • [Launch Web Studio](./web/) • [Consulting & Advisory](./SERVICES.md)
 
@@ -45,14 +45,14 @@ Every blueprint provides complete operational engineering controls:
 
 ---
 
-## 🎯 The Premise: Why 90% of Software Projects Fail
+## 🎯 The Premise: Why Software Projects Miss Business Expectations
 
-Most software projects don't fail because the code syntax was broken. **They fail because of the blind spots nobody anticipated before development started.**
+Software can be built exactly as described and still disappoint the business when the original analysis missed important rules, exceptions, responsibilities, or future conditions.
 
-* **Founders & SMB Owners** burn $30k–$100k on dev agencies because requirements were vague, scope crept out of control, and operational realities (cash flow, tax audits, staff fraud) were omitted.
-* **Software Engineers** dread vague client briefs like *"Build me an Uber-like app for laundry, it should be simple"*, leading to infinite scope arguments, unpaid revision loops, and broken weekend deployments.
+* **Founders & SMB Owners** can spend significant time and money correcting unclear requirements, uncontrolled scope, and operational realities that were not discussed before development.
+* **Software Engineers** may receive vague requests without clear business rules, exception handling, decision ownership, or acceptance criteria—creating avoidable clarification and rework.
 
-`OpenBSA` is the open-source cure. It provides **pre-engineered, developer-ready specifications** for the edge cases that normally destroy projects 3–6 months after launch.
+`OpenBSA` provides a structured way to discover, document, prioritize, and communicate business needs, important edge cases, and unresolved decisions before implementation. Its reference blueprints are starting points for review and adaptation, not guaranteed or universal solutions.
 
 ---
 
@@ -102,22 +102,22 @@ graph LR
     D[Software Engineers & Tech Leads]:::dev --> OS
     S[Small Business Owners & Operators]:::smb --> OS
 
-    OS --> V1[Lock Down Scope Before Paying Devs]:::founder
-    OS --> V2[Eliminate 50% of Unpaid Revision Loops]:::dev
-    OS --> V3[Prevent Fraud, Data Leaks & Tax Fines]:::smb
+    OS --> V1[Clarify scope before development]:::founder
+    OS --> V2[Reduce avoidable rework]:::dev
+    OS --> V3[Surface operational and control risks]:::smb
 ```
 
 1. **SaaS Founders & Indie Hackers:** Lock down your PRD, multi-tenant security, and payment idempotency before spending your first dollar on engineering.
-2. **Small Business Owners (SMBs):** Transition from messy Excel spreadsheets and manual chaos to custom software with bulletproof internal fraud controls.
-3. **Software Engineers & Freelance Agencies:** Send this repo to your clients. Tell them: *"Fill out these specifications, or hire a Business Systems Analyst to do it, before we write a single line of code."*
+2. **Small Business Owners (SMBs):** Make operational gaps, manual workarounds, responsibilities, and control needs visible before selecting or changing software.
+3. **Software Engineers & Freelance Agencies:** Use the analysis and handoff materials to clarify the business problem, rules, exceptions, open decisions, and acceptance conditions before implementation.
 
 ---
 
-## 🛡️ The 14 Anti-Failure Blueprints ("Before People Think of It, We Solved It")
+## 🛡️ Reference Blueprints for Common Failure Modes
 
-PostgreSQL DDL examples, Mermaid visual flows, and BDD acceptance criteria intended for review and adaptation:
+The repository includes examples such as PostgreSQL DDL, Mermaid flows, and BDD acceptance criteria. Each blueprint is a reference pattern to review against the actual business context; it does not mean the risk is universally solved or that every project needs every control.
 
-| # | Blueprint Specification | The Hidden Trap Solved |
+| # | Blueprint Specification | Business or system risk considered |
 |---|-------------------------|------------------------|
 | **01** | [Payment Webhook Idempotency & Reconciliation](./06-edge-cases-and-anti-failure/01-payment-idempotency-and-webhook-reconciliation.md) | Ghost orders, double-billing, and dropped webhook retries. |
 | **02** | [Inventory Concurrency & Race Conditions](./06-edge-cases-and-anti-failure/02-inventory-concurrency-and-race-conditions.md) | Overselling items during flash sales and negative stock. |
