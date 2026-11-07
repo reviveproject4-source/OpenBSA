@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  inline-javascript:
-    runs-on: ubuntu-latest
+  static:
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -33,3 +33,29 @@ jobs:
           PY
       - name: Validate JavaScript syntax
         run: node --check /tmp/openbsa-inline.js
+
+  postgres-rls:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Run PostgreSQL tenant-isolation tests
+        run: psql -v ON_ERROR_STOP=1 -f tests/postgres/rls-isolation.sql
