@@ -187,3 +187,8 @@ If this blueprint saved your startup from a costly rewrite, helped you scope a p
 Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for details.
 
 *(c) 2026 Tri Raida. Designed with real operational business experience & ❤️ for the global tech community.*
+
+## Automated quality checks
+
+Pull requests run a syntax check for the Web Studio's inline JavaScript and PostgreSQL 16 smoke tests for the documented tenant-isolation pattern. These checks validate source syntax and the reference RLS pattern; they do not certify a deployed application or replace tenant-specific security testing.
+
