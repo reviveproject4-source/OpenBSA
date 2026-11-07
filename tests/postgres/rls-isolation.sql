@@ -139,7 +139,7 @@ COMMIT;
 -- A malformed tenant UUID must fail closed with a cast error, not broaden access.
 BEGIN;
 SELECT set_config('app.current_tenant_id', 'not-a-uuid', true);
-DO $
+DO $malformed$
 BEGIN
     BEGIN
         PERFORM 1 FROM tenant_test.customer_invoices;
@@ -149,7 +149,7 @@ BEGIN
             NULL;
     END;
 END
-$;
+$malformed$;
 COMMIT;
 
 -- Threat-model demonstration: the custom GUC is not authentication.
@@ -157,13 +157,13 @@ COMMIT;
 -- This is why the application must never expose arbitrary SQL execution.
 BEGIN;
 SELECT set_config('app.current_tenant_id', '22222222-2222-4222-8222-222222222222', true);
-DO $
+DO $trust_boundary$
 BEGIN
     IF (SELECT count(*) FROM tenant_test.customer_invoices) <> 1 THEN
         RAISE EXCEPTION 'Expected the test role to demonstrate its ability to change the custom GUC';
     END IF;
 END
-$;
+$trust_boundary$;
 COMMIT;
 
 -- Cross-tenant INSERT must be rejected by WITH CHECK.
