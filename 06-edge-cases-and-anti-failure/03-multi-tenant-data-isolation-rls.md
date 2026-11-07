@@ -1,124 +1,139 @@
-# Blueprint 03: Multi-Tenant Data Isolation & RLS
+# Blueprint 03: Multi-Tenant Data Isolation & Row-Level Security (RLS)
 
-> **Target Problem:** A developer forgets to append `WHERE tenant_id = current_tenant` in a newly added export endpoint. A user from Company A clicks "Export Invoices" and accidentally downloads Company B's confidential pricing, customer names, and revenue data.
+> **Status: PROPOSED — SECURITY REVIEW REQUIRED**
+>
+> This blueprint is a reference pattern, not a security certification. RLS is one layer of defense. Production safety depends on database roles, transaction handling, application authentication, every tenant-scoped table, and adversarial testing.
 
----
+## 1. Problem and scope
 
-## 1. Assumptions (Asumsi)
-* **Shared-Database Multi-Tenancy:** The business operates a multi-tenant SaaS architecture where multiple companies share the same PostgreSQL database schema to minimize infrastructure costs.
-* **Human Engineering Fallibility:** Developers will inevitably forget to manually append `WHERE tenant_id = ?` to every query as the codebase scales to hundreds of endpoints.
-* **Zero Cross-Tenant Tolerance:** Enterprise B2B customers require zero tolerance for data leaks under SOC2, ISO27001, and GDPR compliance.
+In a shared-schema SaaS database, a missing tenant filter can expose another customer's records. PostgreSQL Row-Level Security (RLS) can enforce row filtering in the database for roles subject to RLS.
 
----
+This pattern assumes:
+- Each tenant-owned row has a non-null `tenant_id UUID`.
+- The application authenticates the user and derives the tenant ID from a verified server-side identity, never from an untrusted request parameter.
+- Each request that accesses tenant data runs inside a database transaction.
+- The application connects using a dedicated, non-owner, non-superuser role without `BYPASSRLS`.
+- The application role cannot execute arbitrary SQL or change its database role.
 
-## 2. Prerequisites (Prasyarat)
-* **PostgreSQL 12+:** Native support for `ROW LEVEL SECURITY` (RLS) and `FORCE ROW LEVEL SECURITY`.
-* **Session Parameter Middleware:** Backend framework capable of executing session initialization (`SET LOCAL app.current_tenant_id = :tenant_id`) upon checking out a database connection from the pool.
+## 2. Critical PostgreSQL security facts
 
----
+1. Superusers and roles with `BYPASSRLS` always bypass RLS.
+2. Table owners normally bypass RLS; `FORCE ROW LEVEL SECURITY` subjects the table owner to policies, but does not constrain superusers or `BYPASSRLS` roles.
+3. RLS does not replace SQL privileges. A role needs ordinary table privileges as well as a matching policy.
+4. A missing policy on an RLS-enabled table means default deny for roles subject to RLS.
+5. Referential-integrity checks, including unique and foreign-key checks, bypass row security and may create information side channels.
+6. A custom setting such as `app.current_tenant_id` is context supplied by the database client. It is not independently authenticated or cryptographically protected by PostgreSQL. If an attacker can execute arbitrary SQL as the application role, they may be able to change a custom setting. Prevent SQL injection and do not treat the setting itself as proof of identity.
 
-## 3. Failure Scenario & Blast Radius (Skenario Kegagalan)
-* **The Failure Story:** A B2B SaaS startup closes a $5,000/month enterprise client. A junior developer ships a feature: `GET /api/v1/customers/search?q=acme`. The developer uses a direct SQL query without a tenant filter. An enterprise user searches for a prospect and sees full contact details, order sizes, and discount rates belonging to their direct market competitor who also uses the platform.
-* **Financial Impact:** Customer immediately terminates contract, demands a full refund, and reports the data breach to the regulatory privacy commission, resulting in a potential GDPR penalty of up to 4% of annual turnover.
-* **Blast Radius:** Total compromise of data confidentiality across all tenants in the system.
+## 3. Database role separation
 
----
-
-## 4. Architectural Blueprint & DDL (Spesifikasi Arsitektur)
-
-```mermaid
-graph TD
-    classDef client fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef middleware fill:#ede7f6,stroke:#512da8,stroke-width:2px;
-    classDef rls fill:#ffebee,stroke:#c62828,stroke-width:2px;
-    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-
-    User[User Request: JWT Claims tenant_id = 't-123']:::client --> MW[API Auth Middleware]:::middleware
-    MW -->|Extracts Claims & Opens DB Transaction| DBConn[DB Connection Session]:::middleware
-    
-    DBConn -->|Executes: <code>SET LOCAL app.current_tenant_id = 't-123'</code>| Kernel[PostgreSQL RLS Engine]:::rls
-    
-    Query[Developer Query: <code>SELECT * FROM customer_invoices;</code>]:::middleware --> Kernel
-    
-    Kernel -->|PostgreSQL auto-injects:<br/><code>tenant_id = current_setting('app.current_tenant_id')::UUID</code>| Result[Returns ONLY Records Belonging to 't-123']:::db
-    Kernel -.->|Blocks & Hides Silently| OtherTenants[Tenant 't-456' Records Completely Invisible]:::rls
-```
+Use separate roles for migrations/ownership and runtime access. The following is an illustrative starting point; adapt grants to the actual schema and deployment process.
 
 ```sql
--- Production DDL: Kernel-Level RLS Policy
+-- Run as a controlled database administrator.
+CREATE ROLE app_owner NOLOGIN;
+CREATE ROLE app_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+
+-- The runtime role must not own tenant tables and must not inherit a role
+-- that owns them or has BYPASSRLS/SUPERUSER.
+-- Grant only the required schema and table privileges.
+GRANT USAGE ON SCHEMA public TO app_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON customer_invoices TO app_runtime;
+```
+
+Do not grant `TRUNCATE`, schema ownership, role membership with elevated privileges, or broad grants unless explicitly required and separately reviewed. Verify effective role membership and attributes in the deployed database.
+
+## 4. Tenant context and policy example
+
+The application must:
+1. Validate the authenticated identity and authorize its tenant membership on the server.
+2. Begin a transaction.
+3. Set the tenant context transaction-locally using a parameterized query.
+4. Execute all tenant-scoped queries in that same transaction.
+5. Commit or roll back before returning the connection to the pool.
+
+Example transaction setup (use a parameterized value, not string concatenation):
+
+```sql
+SELECT set_config('app.current_tenant_id', $1, true);
+```
+
+The third argument `true` makes the setting transaction-local. Do not use a session-wide `SET` with pooled connections.
+
+Illustrative table and policy:
+
+```sql
 CREATE TABLE tenants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_name VARCHAR(255) NOT NULL,
-    plan_tier VARCHAR(50) NOT NULL DEFAULT 'standard',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    company_name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE customer_invoices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    invoice_number VARCHAR(50) NOT NULL,
-    total_amount_cents BIGINT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    invoice_number TEXT NOT NULL,
+    total_amount_cents BIGINT NOT NULL CHECK (total_amount_cents >= 0),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (tenant_id, invoice_number)
 );
 
--- 1. Enable RLS on the table
+ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tenants FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_self_access ON tenants
+    FOR SELECT
+    TO app_runtime
+    USING (id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid);
+
 ALTER TABLE customer_invoices ENABLE ROW LEVEL SECURITY;
-
--- 2. CRITICAL: Force RLS for table owners to prevent superuser bypasses
 ALTER TABLE customer_invoices FORCE ROW LEVEL SECURITY;
-
--- 3. Define the strict isolation policy
-CREATE POLICY tenant_isolation_policy ON customer_invoices
+CREATE POLICY invoice_tenant_isolation ON customer_invoices
     FOR ALL
-    USING (
-        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
-    )
-    WITH CHECK (
-        tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID
-    );
+    TO app_runtime
+    USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid)
+    WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid);
+
+CREATE INDEX customer_invoices_tenant_created_idx
+    ON customer_invoices (tenant_id, created_at);
 ```
 
----
+The example policy is illustrative. Add policies and least-privilege grants for every tenant-scoped table and command actually used by the application. Avoid permissive policies that accidentally broaden access; PostgreSQL combines permissive policies with OR semantics.
 
-## 5. Recovery Strategy & Self-Healing (Strategi Pemulihan)
-* **Fail-Closed Default:** If `app.current_tenant_id` is empty, unset, or malformed, the PostgreSQL policy evaluates to `NULL`, returning **0 rows**. The system fails closed rather than failing open.
-* **Automated Audit Alert on Cross-Tenant Probe:** An exception logging hook triggers whenever a query explicitly requests an ID belonging to a different tenant, generating an immediate `P1_SECURITY_BREACH_PROBE` alert to the security operations team.
+## 5. Fail-closed behavior and operational constraints
 
----
+- If the tenant setting is absent or empty, `current_setting(..., true)` returns NULL (or the `NULLIF` expression returns NULL); the equality predicate is not true, so rows are not visible and writes are rejected by `WITH CHECK`.
+- A malformed UUID value raises a cast error. Treat this as a rejected request and investigate; do not describe it as a clean zero-row response.
+- Ensure every tenant query, including background jobs, exports, reporting, RPCs, views, and stored procedures, runs under the intended security context.
+- Review `SECURITY DEFINER` functions, views, triggers, foreign-key/unique constraint side channels, and administrative/service roles separately.
+- For transaction pooling, set tenant context inside the transaction using transaction-local configuration.
+- Never expose a service role, database owner, superuser, or `BYPASSRLS` credential to browsers or ordinary application requests.
 
-## 6. Security Boundary & Access Scope (Batas Keamanan)
-* **Immutable Tenant Claim:** The `tenant_id` is cryptographically signed inside the user's JWT at login and cannot be altered by query parameters, request headers, or client-side payloads.
-* **Separation of Superuser Roles:** The web application connects to PostgreSQL using a restricted role (`app_user`) that cannot bypass RLS (`NOBYPASSRLS`). Only migration scripts run under the schema owner role.
+## 6. Verification checklist
 
----
+Do not mark this blueprint verified until tests run against the actual deployed PostgreSQL version and runtime role.
 
-## 7. Test Scenarios (Skenario Pengujian)
+| Test | Expected result |
+|---|---|
+| Runtime role reads its own tenant rows | Only its tenant's rows are visible |
+| Runtime role reads another tenant's row by ID | No row is returned |
+| Runtime role inserts/updates a row with another tenant ID | Rejected by RLS |
+| Tenant context is absent | No tenant rows visible; tenant writes rejected |
+| Tenant context is malformed | Statement fails; request is rejected safely |
+| Two tenants reuse a pooled connection sequentially | No tenant context leaks between transactions |
+| Runtime role attempts to set another tenant context | Must be prevented by the trusted application boundary; explicitly test SQL injection/arbitrary SQL threat model |
+| Runtime role attributes are inspected | Not superuser, not table owner, no `BYPASSRLS`, no elevated inherited role |
+| Every tenant-scoped table is enumerated | RLS enabled and policies reviewed for all applicable commands |
+| Admin, backup, and migration paths are tested | Explicitly authorized and isolated from normal runtime credentials |
 
-```gherkin
-Feature: Multi-Tenant Data Isolation
+A test executed as a superuser or privileged table owner is not evidence that the application runtime role is protected.
 
-  Scenario: Tenant Queries Their Own Invoices
-    Given tenant "Alpha-Corp" has 3 invoices in the database
-    When a user from "Alpha-Corp" executes "SELECT * FROM customer_invoices"
-    Then the database returns exactly 3 records belonging to "Alpha-Corp"
+## 7. Assumptions, trade-offs, and limitations
 
-  Scenario: Developer Forgets Tenant Filter (Cross-Tenant Leak Prevention)
-    Given tenant "Alpha-Corp" has invoice "INV-001"
-    And tenant "Beta-LLC" has invoice "INV-002"
-    When an authenticated user from "Alpha-Corp" queries "SELECT * FROM customer_invoices" without a WHERE clause
-    Then the database returns ONLY "INV-001"
-    And invoice "INV-002" is completely invisible
+- Shared-schema RLS is not a substitute for dedicated databases where contractual or regulatory isolation requires physical separation.
+- Index tenant filter columns and measure query plans with realistic data volumes.
+- Review foreign-key and unique-constraint behavior for cross-tenant information leakage.
+- Do not claim compliance with GDPR, SOC 2, ISO 27001, or any other framework solely because RLS is enabled.
+- Record the PostgreSQL version, runtime role, migration owner, transaction-pooling mode, policies, test evidence, reviewer, and review date for each implementation.
 
-  Scenario: Explicit Cross-Tenant ID Tampering
-    Given an authenticated user from "Alpha-Corp"
-    When the user requests "GET /api/invoices/INV-002" (belonging to "Beta-LLC")
-    Then the system returns HTTP 404 Not Found
-    And zero data bytes from "Beta-LLC" are leaked in the response
-```
+## 8. Evidence and maturity
 
----
-
-## 8. Batasan Penerapan & Trade-offs (Kapan JANGAN Digunakan)
-* **Contraindications:** Do not implement shared-schema RLS for highly regulated government defense contracts or healthcare systems requiring separate physical databases or isolated dedicated servers per customer.
-* **Performance Overhead:** RLS adds an automatic query planner constraint. For high-throughput analytics queries (>10 million rows), ensure that `tenant_id` is the primary leading column in all composite indexes (e.g. `CREATE INDEX idx_invoices_tenant_date ON customer_invoices(tenant_id, created_at)`).
+**Current maturity: PROPOSED.** The SQL and checklist above are reference guidance. They have not been executed against a production database as part of this repository change. A reviewer must attach test output and deployment-specific evidence before changing the maturity status.
