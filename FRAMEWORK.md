@@ -138,3 +138,48 @@ sequenceDiagram
     Architect->>Analyst: Execute concurrency stress test and automated self-healing crons
     Analyst->>Founder: Present verified audit reports; milestone approved for deployment
 ```
+
+---
+
+## 7. Business-to-Developer Handoff — Make the Analysis Usable
+
+OpenBSA analysis must be understandable to the people who will estimate, design, build, test, and operate the solution. A strong analysis does not prescribe code. It explains the business problem, desired outcome, process, roles, rules, exceptions, decisions, and acceptance conditions clearly enough that developers do not have to invent business policy.
+
+### 7.1 Minimum handoff
+
+A relevant handoff should include:
+- Business problem, evidence, desired outcome, and success measure.
+- Scope, exclusions, constraints, and dependencies.
+- Current and intended process, including important exceptions.
+- Business roles, responsibilities, approval authority, and delegation.
+- Business rules and information/recordkeeping needs.
+- Current gaps and plausible future scenarios with proportionate responses.
+- Observable acceptance criteria, including negative and boundary cases.
+- Open questions, assumptions, decision owners, and deadlines.
+- Operational ownership, fallback, training, and handover needs.
+
+Mark items as confirmed, assumed, open, or not applicable with a reason. Do not hide uncertainty to make a document appear complete.
+
+### 7.2 Keep business intent separate from technical implementation
+
+Describe the behavior the business needs, not a predetermined class, database, framework, API, or infrastructure design. Developers and technical specialists propose the implementation. The BSA and business owner confirm that it satisfies the business rules, constraints, and acceptance outcomes.
+
+### 7.3 Make unresolved decisions visible
+
+A developer must be able to identify what is decided, what is assumed, what remains open, who can decide, and what work is blocked. Developers should raise contradictions, ambiguity, and newly discovered risks rather than silently inventing policy.
+
+### 7.4 Handoff readiness
+
+- **Ready for estimation:** problem, scope, main workflow, key rules, major gaps, and acceptance outcomes are understandable; remaining questions are visible.
+- **Ready for implementation:** decisions and dependencies needed for the next increment are resolved; acceptance criteria and reviewers are named.
+- **Not ready:** important business rules, authority, financial handling, scope, or dependencies remain ambiguous.
+
+A handoff is not a guarantee that all future events are known. It is an honest account of what has been analyzed and what remains uncertain.
+
+**Reference documents:**
+- [Business-to-Developer Handoff Standard](./00-governance-and-standards/09-business-to-developer-handoff-standard.md)
+- [Business-to-Developer Handoff Pack](./01-core-templates/05-business-to-developer-handoff-pack.md)
+- [Worked Example — Refund Request Handoff](./07-worked-examples/01-refund-request-handoff-example.md)
+
+**Guiding principle:** The BSA makes the business intent and consequential edge cases visible. The developer translates that intent into a suitable technical solution and raises new uncertainty before it becomes hidden behavior.
+
