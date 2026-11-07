@@ -56,6 +56,27 @@ Most software projects don't fail because the code syntax was broken. **They fai
 
 ---
 
+## 🔎 Anticipatory Gap Analysis: Find the Problem Before It Happens
+
+OpenBSA is designed not only to document known failure modes, but also to help a BSA uncover important gaps that have not happened yet. The goal is not to predict every future event. It is to make uncertainty visible, test assumptions, and prepare proportionate business responses.
+
+The **Anticipatory Gap Analysis Standard** guides discovery across:
+- Business goals, boundaries, and conflicting expectations.
+- People, roles, authority, delegation, and key-person dependency.
+- Normal workflows, exceptions, corrections, and manual workarounds.
+- Customer experience, data, money, and recordkeeping.
+- Growth, peak demand, external dependencies, and service disruption.
+- Security, misuse, continuity, business change, and exit.
+
+It also distinguishes confirmed facts from assumptions, possible gaps, and stakeholder decisions. Relevant future scenarios are prioritized by business impact, exposure, detectability, reversibility, and readiness—not by unsupported probability or invented financial estimates.
+
+- **[Read the Anticipatory Gap Analysis Standard](./00-governance-and-standards/08-anticipatory-gap-analysis-standard.md)**
+- **[Use the Anticipatory Gap Register Template](./01-core-templates/04-anticipatory-gap-register.md)**
+
+**BSA principle:** Identify what is missing, explain why it matters, agree who owns the decision, and prepare a proportionate response. Do not turn every possibility into a feature request.
+
+---
+
 ## 👥 Who This Is Built For
 
 ```mermaid
